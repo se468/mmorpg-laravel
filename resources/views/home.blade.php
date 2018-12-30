@@ -1,9 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.app', [
+    'centerContents' => true
+])
 
 @section('content')
 <canvas id="game-screen" width="600" height="400"></canvas>
+@endsection
 
-{{-- 
-<img src="/images/characters/body/male/light.png" alt="">
---}}
+@section('extra-javascript')
+<script>
+    let map = {!! json_encode($map, JSON_HEX_TAG) !!};
+</script>
 @endsection

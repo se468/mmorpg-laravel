@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Please Log in to Begin the game
+                    MMO Laravel
                 </div>
 
                 <div class="links">

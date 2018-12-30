@@ -19,7 +19,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
+    <div id="app" @if(isset($centerContents))class="d-flex flex-column" @endif>
         <nav class="navbar navbar-expand-md navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
@@ -48,7 +48,14 @@
                                 </li>
                             @endif
                         @else
+                            <li class="nav-item">
+                                <a href="{{ route('admin') }}" class="nav-link">
+                                    Admin
+                                </a>
+                            </li>
                             <li class="nav-item dropdown">
+                                
+                                
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }} <span class="caret"></span>
                                 </a>
@@ -70,13 +77,16 @@
                 </div>
             </div>
         </nav>
-
-        <main>
+        @include('layouts.status')
+        <main @if(isset($centerContents))class="flex-center" @endif>
+            
             @yield('content')
         </main>
     </div>
 
     <!-- Scripts -->
+    @yield('extra-javascript')
+    
     <script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

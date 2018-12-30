@@ -1754,10 +1754,10 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
-/*!***************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
-  \***************************************************************************************************************************************************************************/
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1779,9 +1779,161 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['map'],
+  data: function data() {
+    return {
+      canvas: null,
+      tileImg: new Image(),
+      selectedTile: null,
+      mousedown: false,
+      mapData: {
+        w: 640,
+        h: 480,
+        tileData: []
+      }
+    };
+  },
+  ready: function ready() {
+    this.prepareComponent();
+  },
   mounted: function mounted() {
-    console.log('Component mounted.');
+    this.prepareComponent();
+  },
+  methods: {
+    prepareComponent: function prepareComponent() {
+      var _this = this;
+
+      this.canvas = document.getElementById('mapmaker-map');
+
+      if (this.map.data) {
+        this.mapData = JSON.parse(this.map.data);
+      } else {
+        var numMapCols = Math.ceil(this.mapData.w / this.getTileWidth(this.map.tileset));
+        var numMapRows = Math.ceil(this.mapData.h / this.getTileHeight(this.map.tileset));
+        this.mapData.tileData = [];
+
+        for (var i = 0; i < numMapCols; i++) {
+          this.mapData.tileData[i] = [];
+
+          for (var j = 0; j < numMapRows; j++) {
+            this.mapData.tileData[i][j] = {}; // add empty object for now
+          }
+        }
+      }
+
+      this.tileImg.src = this.map.tileset.url;
+
+      this.tileImg.onload = function () {
+        _this.drawTiles();
+
+        _this.drawMap();
+      };
+
+      this.canvas.addEventListener("mousemove", function (e) {
+        if (_this.mousedown) {
+          var x = e.clientX - e.target.getBoundingClientRect().x;
+          var y = e.clientY - e.target.getBoundingClientRect().y;
+
+          var grid = _this.getGrid(x, y);
+
+          _this.mapData.tileData[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+
+          _this.drawMap();
+        }
+      }, false);
+      this.canvas.addEventListener("mousedown", function (e) {
+        var x = e.clientX - e.target.getBoundingClientRect().x;
+        var y = e.clientY - e.target.getBoundingClientRect().y;
+
+        var grid = _this.getGrid(x, y);
+
+        _this.mousedown = true;
+        _this.mapData.tileData[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+
+        _this.drawMap();
+      }, false);
+      this.canvas.addEventListener("mouseup", function (e) {
+        _this.mousedown = false;
+      }, false);
+      this.canvas.addEventListener("mouseout", function (e) {
+        _this.mousedown = false;
+      }, false);
+    },
+    getGrid: function getGrid(x, y) {
+      var gridX = x / this.getTileWidth(this.map.tileset);
+      var gridY = y / this.getTileHeight(this.map.tileset);
+      return {
+        x: Math.floor(gridX),
+        y: Math.floor(gridY)
+      };
+    },
+    drawMap: function drawMap() {
+      for (var i = 0; i < this.mapData.tileData.length; i++) {
+        for (var j = 0; j < this.mapData.tileData[i].length; j++) {
+          var tile = this.mapData.tileData[i][j];
+
+          if (tile.id) {
+            var sx = tile.x * this.getTileWidth(this.map.tileset);
+            var sy = tile.y * this.getTileHeight(this.map.tileset);
+            var swidth = this.getTileWidth(this.map.tileset);
+            var sheight = this.getTileHeight(this.map.tileset);
+            var x = this.getTileWidth(this.map.tileset) * i;
+            var y = this.getTileWidth(this.map.tileset) * j;
+            var width = swidth;
+            var height = sheight;
+            this.canvas.getContext('2d').drawImage(this.tileImg, sx, sy, swidth, sheight, x, y, width, height);
+          }
+        }
+      }
+    },
+    drawTiles: function drawTiles() {
+      for (var i = 0; i < this.map.tileset.tiles.length; i++) {
+        var tile = this.map.tileset.tiles[i];
+        var tileCanvas = document.getElementById('tile_' + tile.id);
+        var ctx = tileCanvas.getContext('2d');
+        var sx = tile.x * this.getTileWidth(this.map.tileset);
+        var sy = tile.y * this.getTileHeight(this.map.tileset);
+        var swidth = this.getTileWidth(this.map.tileset);
+        var sheight = this.getTileHeight(this.map.tileset);
+        ctx.drawImage(this.tileImg, sx, sy, swidth, sheight, 0, 0, swidth, sheight);
+      }
+    },
+    getTileWidth: function getTileWidth(tileset) {
+      return tileset.image_width / tileset.horizontal_length;
+    },
+    getTileHeight: function getTileHeight(tileset) {
+      return tileset.image_height / tileset.vertical_length;
+    },
+    store: function store() {
+      var url = "/map/" + this.map.id;
+      var data = {
+        'mapData': JSON.stringify(this.mapData)
+      };
+      axios.put(url, data).then(function (response) {
+        console.log(response);
+        alert(response.data.status);
+      }).catch(function (error) {
+        console.log(error);
+      });
+    }
   }
 });
 
@@ -36619,10 +36771,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
-/*!*******************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
-  \*******************************************************************************************************************************************************************************************************************/
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07&":
+/*!************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07& ***!
+  \************************************************************************************************************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -36634,29 +36786,65 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div", { staticClass: "row" }, [
+    _vm._m(0),
+    _vm._v(" "),
+    _c("div", { staticClass: "col-md-4" }, [
+      _c(
+        "div",
+        { staticClass: "mb-4" },
+        [
+          _vm._l(_vm.map.tileset.tiles, function(tile) {
+            return [
+              _c("canvas", {
+                staticClass: "mapmaker-tile mr-1",
+                class: {
+                  selected: tile == _vm.selectedTile
+                },
+                attrs: {
+                  id: "tile_" + tile.id,
+                  width: _vm.getTileWidth(_vm.map.tileset),
+                  height: _vm.getTileHeight(_vm.map.tileset)
+                },
+                on: {
+                  click: function($event) {
+                    _vm.selectedTile = tile
+                  }
+                }
+              })
+            ]
+          })
+        ],
+        2
+      ),
+      _vm._v(" "),
+      _c("div", [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-primary btn-block",
+            on: {
+              click: function($event) {
+                _vm.store()
+              }
+            }
+          },
+          [_vm._v("Save")]
+        )
+      ])
+    ])
+  ])
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "row justify-content-center" }, [
-        _c("div", { staticClass: "col-md-8" }, [
-          _c("div", { staticClass: "card card-default" }, [
-            _c("div", { staticClass: "card-header" }, [
-              _vm._v("Example Component")
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [
-              _vm._v(
-                "\n                    I'm an example component.\n                "
-              )
-            ])
-          ])
-        ])
-      ])
+    return _c("div", { staticClass: "col-md-8" }, [
+      _c("canvas", {
+        staticClass: "mapmaker-map",
+        attrs: { id: "mapmaker-map", width: "600", height: "400" }
+      })
     ])
   }
 ]
@@ -47935,6 +48123,8 @@ module.exports = function(module) {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -47953,7 +48143,7 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('example-component', __webpack_require__(/*! ./components/ExampleComponent.vue */ "./resources/js/components/ExampleComponent.vue").default);
+Vue.component('mapmaker-component', __webpack_require__(/*! ./components/Map/MapmakerComponent.vue */ "./resources/js/components/Map/MapmakerComponent.vue").default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -47962,13 +48152,13 @@ Vue.component('example-component', __webpack_require__(/*! ./components/ExampleC
 
 var gameScreen = document.getElementById('game-screen');
 var settings = {
-  upKey: 119,
+  upKey: 87,
   //w
-  downKey: 115,
+  downKey: 83,
   //s
-  leftKey: 97,
+  leftKey: 65,
   //a
-  rightKey: 100,
+  rightKey: 68,
   //d
   gridSize: {
     w: 832 / 13,
@@ -47985,6 +48175,18 @@ var store = {
 };
 var characterImg = new Image();
 characterImg.src = '/images/characters/body/male/light.png';
+var tileImg = null;
+var tileWidth = null;
+var tileHeight = null;
+var mapData = null;
+
+if ((typeof map === "undefined" ? "undefined" : _typeof(map)) !== undefined && gameScreen) {
+  tileImg = new Image();
+  tileImg.src = map.tileset.url;
+  mapData = JSON.parse(map.data);
+  tileWidth = map.tileset.image_width / map.tileset.horizontal_length;
+  tileHeight = map.tileset.image_height / map.tileset.vertical_length;
+}
 
 function update() {// Update the state of the world for the elapsed time since last render
 }
@@ -47992,7 +48194,25 @@ function update() {// Update the state of the world for the elapsed time since l
 function draw() {
   var ctx = document.getElementById('game-screen').getContext('2d');
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
+  drawMap(ctx);
   drawCharacter(ctx);
+}
+
+function drawMap(ctx) {
+  for (var i = 0; i < mapData.tileData.length; i++) {
+    for (var j = 0; j < mapData.tileData[i].length; j++) {
+      var tile = mapData.tileData[i][j];
+      var sx = tile.x * tileWidth;
+      var sy = tile.y * tileHeight;
+      var swidth = tileWidth;
+      var sheight = tileHeight;
+      var x = tileWidth * i;
+      var y = tileWidth * j;
+      var width = swidth;
+      var height = sheight;
+      ctx.drawImage(tileImg, sx, sy, swidth, sheight, x, y, width, height);
+    }
+  }
 }
 
 function drawCharacter(ctx) {
@@ -48013,12 +48233,12 @@ function drawCharacter(ctx) {
 
   if (store.direction == 'E') {
     sx = 0;
-    sy = sy = characterHeight * 3;
+    sy = characterHeight * 3;
   }
 
   if (store.direction == 'W') {
     sx = 0;
-    sy = sy = characterHeight;
+    sy = characterHeight;
   }
 
   var swidth = characterWidth;
@@ -48031,37 +48251,39 @@ function drawCharacter(ctx) {
 }
 
 $(document).ready(function () {
-  function loop(timestamp) {
-    var progress = timestamp - lastRender;
-    update(progress);
-    draw();
-    lastRender = timestamp;
+  if (gameScreen) {
+    var loop = function loop(timestamp) {
+      var progress = timestamp - lastRender;
+      update(progress);
+      draw();
+      lastRender = timestamp;
+      window.requestAnimationFrame(loop);
+    };
+
+    var lastRender = 0;
     window.requestAnimationFrame(loop);
+    $(document).keydown(function (e) {
+      if (e.keyCode == settings.upKey || e.keyCode == 38) {
+        store.direction = 'N';
+        store.position.y -= tileHeight;
+      }
+
+      if (e.keyCode == settings.downKey || e.keyCode == 40) {
+        store.direction = 'S';
+        store.position.y += tileHeight;
+      }
+
+      if (e.keyCode == settings.rightKey || e.keyCode == 39) {
+        store.direction = 'E';
+        store.position.x += tileWidth;
+      }
+
+      if (e.keyCode == settings.leftKey || e.keyCode == 37) {
+        store.direction = 'W';
+        store.position.x -= tileWidth;
+      }
+    });
   }
-
-  var lastRender = 0;
-  window.requestAnimationFrame(loop);
-  $(document).keypress(function (e) {
-    if (e.which == settings.upKey) {
-      store.direction = 'N';
-      store.position.y -= settings.gridSize.h;
-    }
-
-    if (e.which == settings.downKey) {
-      store.direction = 'S';
-      store.position.y += settings.gridSize.h;
-    }
-
-    if (e.which == settings.rightKey) {
-      store.direction = 'E';
-      store.position.x += settings.gridSize.w;
-    }
-
-    if (e.which == settings.leftKey) {
-      store.direction = 'W';
-      store.position.x -= settings.gridSize.w;
-    }
-  });
 });
 var app = new Vue({
   el: '#app'
@@ -48127,18 +48349,18 @@ if (token) {
 
 /***/ }),
 
-/***/ "./resources/js/components/ExampleComponent.vue":
-/*!******************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue ***!
-  \******************************************************/
+/***/ "./resources/js/components/Map/MapmakerComponent.vue":
+/*!***********************************************************!*\
+  !*** ./resources/js/components/Map/MapmakerComponent.vue ***!
+  \***********************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
-/* harmony import */ var _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony import */ var _MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MapmakerComponent.vue?vue&type=template&id=3d0e2d07& */ "./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07&");
+/* harmony import */ var _MapmakerComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MapmakerComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -48147,9 +48369,9 @@ __webpack_require__.r(__webpack_exports__);
 /* normalize component */
 
 var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
-  _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["render"],
-  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  _MapmakerComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
   false,
   null,
   null,
@@ -48159,38 +48381,38 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "resources/js/components/ExampleComponent.vue"
+component.options.__file = "resources/js/components/Map/MapmakerComponent.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
 
-/***/ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
-/*!*******************************************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
-  \*******************************************************************************/
+/***/ "./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js&":
+/*!************************************************************************************!*\
+  !*** ./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ExampleComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MapmakerComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./MapmakerComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MapmakerComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
-/***/ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
-/*!*************************************************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
-  \*************************************************************************************/
+/***/ "./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07&":
+/*!******************************************************************************************!*\
+  !*** ./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07& ***!
+  \******************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./MapmakerComponent.vue?vue&type=template&id=3d0e2d07& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

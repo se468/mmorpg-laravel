@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Map;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,6 +24,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $map = Map::first();
+        $map->load('tileset', 'tileset.tiles');
+        return view('home', [
+            'map' => $map
+        ]);
     }
 }
