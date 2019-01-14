@@ -11,4 +11,8 @@ class Map extends Model
     public function tileset () {
         return $this->belongsTo('App\Tileset');
     }
+
+    public function layers () {
+        return $this->hasMany('App\Layer');
+    }
 }

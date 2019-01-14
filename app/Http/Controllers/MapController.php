@@ -45,7 +45,8 @@ class MapController extends Controller
         $input = $request->all();
 
         $map = Map::create($input);
-
+        //Create one layer when creating
+        $map->layers()->create();
         return redirect()->back()->with([
             'status' => 'Map Created'
         ]);
@@ -71,7 +72,7 @@ class MapController extends Controller
     public function edit($id)
     {
         $map = Map::find($id);
-        $map->load(['tileset', 'tileset.tiles']);
+        $map->load(['tileset', 'tileset.tiles', 'layers']);
 
         return view('admin.map.edit', ['map' => $map]);
     }
@@ -88,8 +89,16 @@ class MapController extends Controller
         $input = $request->all();
 
         $map = Map::find($id);
-        $map->data = $input['mapData'];
         $map->save();
+
+        $map->layers()->delete();
+        foreach($input['layersData'] as $layerData) {
+            $layer = $map->layers()->create([
+                'data' => $layerData['data'],
+                'z_index' => $layerData['z_index']
+            ]);
+        }
+
         return response()->json([
             'status' => 'Map has been saved!'
         ]);
@@ -103,8 +112,9 @@ class MapController extends Controller
      */
     public function destroy($id)
     {
-        Map::find($id)->delete();
-
+        $map = Map::find($id);
+        $map->layers()->delete();
+        $map->delete();
         return redirect()->route('map.index')->with([
             'status' => 'Map has been deleted'
         ]);

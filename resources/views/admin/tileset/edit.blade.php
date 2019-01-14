@@ -13,17 +13,7 @@
         </form>
     </h1>
 
-    <div class="row">
-        <div class="col-md-6">
-            @include('admin.tileset.form', [
-                'mode' => 'edit',
-                'formTileset' => $tileset
-            ])
-        </div>
-        <div class="col-md-6">
-            <img src="{{ $tileset->url }}" class="img-fluid">
-        </div>
-    </div>
+    <tileset-edit-component :tileset="{{ json_encode($tileset) }}"></tileset-edit-component>
     
 </div>
 @endsection

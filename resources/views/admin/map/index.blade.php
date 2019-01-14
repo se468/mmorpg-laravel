@@ -37,7 +37,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <input type="text" name="name" class="form-control">
+                        <input type="text" name="name" class="form-control" placeholder="Map Name">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" name="width" class="form-control" placeholder="Map width (by number of grids)">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" name="height" class="form-control" placeholder="Map height (by number of grids)">
                     </div>
 
                     <input type="submit" class="btn btn-primary btn-block">

@@ -17,10 +17,8 @@ window.Vue = require('vue');
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
 
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
-
-Vue.component('mapmaker-component', require('./components/Map/MapmakerComponent.vue').default);
+const files = require.context('./', true, /\.vue$/i)
+files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -28,156 +26,58 @@ Vue.component('mapmaker-component', require('./components/Map/MapmakerComponent.
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+import Character from './character';
+window.Character = Character;
 
-let gameScreen = document.getElementById('game-screen');
-let settings = {
-    upKey: 87, //w
-    downKey: 83, //s
-    leftKey: 65, //a
-    rightKey: 68, //d
+import Map from './map';
+window.Map = Map;
 
-    gridSize: {
-        w: 832 / 13,
-        h: 1344 / 21
-    }
+import Tileset from './tileset';
+window.Tileset = Tileset;
 
-};
+if(window.loadGame) {
+    window.GLOBAL = { //contains data related to game or drawing
+        settings: {
+            upKey: 87, //w
+            downKey: 83, //s
+            leftKey: 65, //a
+            rightKey: 68, //d
+        },
+    };
 
-let store = {
-    'direction' : 'S', // N, E, S, W
-    'position': {
-        x: 0,
-        y: 0
-    }
-};
+    window.GAME_OBJECTS = {
+        character: new Character(),
+        map: new Map()
+    };
 
-let characterImg = new Image();
-characterImg.src = '/images/characters/body/male/light.png';
-let tileImg = null;
-let tileWidth = null;
-let tileHeight = null;
-let mapData = null;
-if (typeof (map) !== undefined && gameScreen) {
-    tileImg = new Image();
-    tileImg.src = map.tileset.url;
-    mapData = JSON.parse(map.data);
-    tileWidth = map.tileset.image_width / map.tileset.horizontal_length;
-    tileHeight = map.tileset.image_height / map.tileset.vertical_length
-}
-
-function update() {
-    // Update the state of the world for the elapsed time since last render
-}
-
-
-function draw() {
-    let ctx = document.getElementById('game-screen').getContext('2d');
-    ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
+    initializeMap();
+    initializeCharacter();
     
-    drawMap(ctx);
-    drawCharacter(ctx);
 }
 
-function drawMap(ctx) {
-    for (let i = 0; i < mapData.tileData.length; i++) {
-        for (let j = 0; j < mapData.tileData[i].length; j++) {
-            let tile = mapData.tileData[i][j];
-            let sx = tile.x * tileWidth;
-            let sy = tile.y * tileHeight;
-            let swidth = tileWidth;
-            let sheight = tileHeight;
-            let x = tileWidth * i;
-            let y = tileWidth * j;
-            let width = swidth;
-            let height = sheight;
-
-            ctx.drawImage(
-                tileImg,
-                sx,
-                sy,
-                swidth,
-                sheight,
-                x,
-                y,
-                width,
-                height
-            );
-        }
-    }
-}
-function drawCharacter (ctx) {
-    let characterWidth = settings.gridSize.w;
-    let characterHeight = settings.gridSize.h;
-
-    let sx = 0;
-    let sy = characterHeight * 2;
-
-    if (store.direction == 'N') {
-        sx = 0;
-        sy = 0;
-    }
-    if (store.direction == 'S') {
-        sx = 0;
-        sy = characterHeight * 2;
-    }
-    if (store.direction == 'E') {
-        sx = 0;
-        sy = characterHeight * 3;
-    }
-    if (store.direction == 'W') {
-        sx = 0;
-        sy = characterHeight;
-    }
-
-    let swidth = characterWidth;
-    let sheight = characterHeight;
-
-    let x = store.position.x;
-    let y = store.position.y;
-    let width = swidth;
-    let height = sheight;
-
-    ctx.drawImage(characterImg, sx, sy, swidth, sheight, x, y, width, height);
+function initializeCharacter () {
+    window.GAME_OBJECTS.character.setImage('/images/characters/body/male/light.png');
+    window.GAME_OBJECTS.character.setGridSize(832 / 13, 1344 / 21);
+    window.GAME_OBJECTS.character.setMap(window.GAME_OBJECTS.map);
 }
 
-
-$(document).ready(() => {
-    if (gameScreen) {
-        
-
-        function loop(timestamp) {
-            var progress = timestamp - lastRender
-
-            update(progress)
-            draw()
-
-            lastRender = timestamp
-            window.requestAnimationFrame(loop)
-        }
-        var lastRender = 0
-        window.requestAnimationFrame(loop)
-
-        $(document).keydown((e)=>{
-            if (e.keyCode == settings.upKey || e.keyCode == 38) {
-                store.direction = 'N';
-                store.position.y -= tileHeight;
-            }
-            if (e.keyCode == settings.downKey || e.keyCode == 40) {
-                store.direction = 'S';
-                store.position.y += tileHeight;
-            }
-            if (e.keyCode == settings.rightKey || e.keyCode == 39) {
-                store.direction = 'E';
-                store.position.x += tileWidth;
-            }
-            if (e.keyCode == settings.leftKey || e.keyCode == 37) {
-                store.direction = 'W';
-                store.position.x -= tileWidth;
-            }
+function initializeMap () {
+    
+    window.GAME_OBJECTS.map.setDimensions(window.rawMapData.width, window.rawMapData.height);
+    if (window.rawMapData.layers.length > 0 && window.rawMapData.layers[0].data) { 
+        let layers = [];
+        window.rawMapData.layers.forEach((l) => {
+            l.data = JSON.parse(l.data)
+            layers.push(l)
         });
+        window.GAME_OBJECTS.map.setLayers(layers);
     }
-});
- 
+    else { 
+        window.GAME_OBJECTS.map.addBlankLayer();
+    }
+
+    window.GAME_OBJECTS.map.tileset.setData(window.rawMapData.tileset);
+}
 
 const app = new Vue({
     el: '#app'

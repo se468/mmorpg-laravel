@@ -1,13 +1,13 @@
-@extends('layouts.app', [
-    'centerContents' => true
-])
+@extends('layouts.app')
 
 @section('content')
-<canvas id="game-screen" width="600" height="400"></canvas>
+<game-component></game-component>
+
 @endsection
 
 @section('extra-javascript')
 <script>
-    let map = {!! json_encode($map, JSON_HEX_TAG) !!};
+    window.loadGame = true;
+    window.rawMapData = {!! json_encode($map, JSON_HEX_TAG) !!};
 </script>
 @endsection

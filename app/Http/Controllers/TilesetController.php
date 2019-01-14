@@ -41,7 +41,6 @@ class TilesetController extends Controller
     public function store(TilesetStore $form)
     {
         $result = $form->persist();
-
         return redirect()->back()->with([
             'status' => 'Tileset has been created',
             'tileset' => $result
@@ -68,6 +67,7 @@ class TilesetController extends Controller
     public function edit($id)
     {
         $tileset = Tileset::find($id);
+        $tileset->load(["tiles"]);
         return view('admin.tileset.edit', [
             'tileset' => $tileset
         ]);
@@ -82,25 +82,16 @@ class TilesetController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $input = $request->all();
-
-
-        $tileset = Tileset::find($id);
-        $tileset->update($input);
-
-        $tileset->tiles()->delete();
-
-        for($x = 0; $x < $input['horizontal_length']; $x ++) {
-            for($y = 0; $y < $input['vertical_length']; $y ++) {
-                $tile = Tile::create([
-                    'tileset_id' => $tileset->id,
-                    'x' => $x,
-                    'y' => $y
-                ]);
-            }
+        $input = $request->all();   
+        
+        foreach($input['tiles'] as $tiledata) {
+            $tile = Tile::find($tiledata['id']);
+            $tile->walkable = $tiledata['walkable'];
+            $tile->save();
         }
 
-        return redirect()->back()->with([
+        
+        return response()->json([
             'status' => 'Tileset has been updated'
         ]);
     }
@@ -113,7 +104,9 @@ class TilesetController extends Controller
      */
     public function destroy($id)
     {
-        Tileset::find($id)->delete();
+        $tileset = Tileset::find($id);
+        $tileset->tiles()->delete();
+        $tileset->delete();
 
         return redirect()->route('tileset.index')->with([
             'status' => 'Tileset has been deleted'

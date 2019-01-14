@@ -25,7 +25,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/home', 'HomeController@index')->name('home');
 
     Route::get('/admin', 'AdminController@index')->name('admin');
-
     Route::resource('/tileset', 'TilesetController');
     Route::resource('/map', 'MapController');
+    Route::resource('/layer', 'LayerController');
 });

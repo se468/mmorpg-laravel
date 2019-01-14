@@ -83,3 +83,47 @@ mapTile = {
 타일 이미지 출처: 
 https://opengameart.org/content/lpc-tile-atlas
 https://forums.rpgmakerweb.com/index.php?threads/ogedeis-asia-themed-content-updated-2018-07-14.58954/
+
+* * *
+
+## Day 3
+> 목표: 리팩토링, 맵 레이어 및 충돌검사
+
+###리팩토링
+
+**자바스크립트**
+[x] 글로벌 
+ - GLOBAL.settings - 키 세팅 등등
+ - GLOBAL.user - 캐릭터 정보 등
+
+[x] 게임 스크린을 Vue component 로 
+[x] 캐릭터, 맵 클래스 
+ - character.draw(); 
+ - map.draw();
+ - 이런식으로 호출 가능하게
+
+[x] 타일 그리기 - function
+
+[x] variable naming
+
+[x] character클래스 global 에 대한 dependency 없애기 
+[x] map 클래스 global 에 대한 dependency 없애기 
+
+**라라벨**
+[x] 맵 마다 사이즈 다르게 
+
+### 맵 레이어
+[x] 맵에는 많은 레이어가 필요함 (Map hasMany Layer)
+ - 타일 레이어들 - 바닥레이어, 그 위 레이어 (나무 등), 캐릭터 위에 보이는 레이어 등
+ - 이벤트 레이어 - 워프, NPC, 상자 등
+
+[x] 캐릭터 위에 그리는 맵 레이어 정하기 (z-index)
+
+### 맵 툴
+[x] 지우개
+[] 페인트 
+[] 사각형
+
+### 충돌검사 
+[x] 벽, 물 등 걸어다니지 못하게
+- Tileset 에 타일마다 충돌검사 지정

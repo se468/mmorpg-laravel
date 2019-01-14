@@ -19,7 +19,6 @@ class CreateMapsTable extends Migration
             $table->integer('tileset_id'); // one map can have one tileset - for now
             $table->text('data')->nullable();
 
-
             $table->timestamps();
         });
     }

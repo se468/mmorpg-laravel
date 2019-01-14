@@ -1754,6 +1754,118 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  mounted: function mounted() {
+    console.log('Component mounted.');
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js&":
+/*!*****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js& ***!
+  \*****************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: [],
+  data: function data() {
+    return {
+      gameObjects: window.GAME_OBJECTS,
+      gameScreen: null,
+      lastRender: 0
+    };
+  },
+  ready: function ready() {
+    this.prepareComponent();
+  },
+  mounted: function mounted() {
+    this.prepareComponent();
+  },
+  methods: {
+    prepareComponent: function prepareComponent() {
+      this.gameScreen = document.getElementById('game-screen');
+      window.requestAnimationFrame(this.loop);
+      this.bindKeys();
+    },
+    bindKeys: function bindKeys() {
+      $(document).keydown(function (e) {
+        if (e.keyCode == GLOBAL.settings.upKey || e.keyCode == 38) {
+          GAME_OBJECTS.character.moveUp();
+        }
+
+        if (e.keyCode == GLOBAL.settings.downKey || e.keyCode == 40) {
+          GAME_OBJECTS.character.moveDown();
+        }
+
+        if (e.keyCode == GLOBAL.settings.rightKey || e.keyCode == 39) {
+          GAME_OBJECTS.character.moveRight();
+        }
+
+        if (e.keyCode == GLOBAL.settings.leftKey || e.keyCode == 37) {
+          GAME_OBJECTS.character.moveLeft();
+        }
+      });
+    },
+    update: function update() {},
+    draw: function draw() {
+      var ctx = this.gameScreen.getContext('2d');
+      ctx.clearRect(0, 0, this.gameScreen.width, this.gameScreen.height);
+      window.GAME_OBJECTS.map.draw(ctx, null, 0);
+      window.GAME_OBJECTS.character.draw(ctx);
+      window.GAME_OBJECTS.map.draw(ctx, null, 20);
+    },
+    loop: function loop(timestamp) {
+      var progress = timestamp - this.lastRender;
+      this.update(progress);
+      this.draw();
+      this.lastRender = timestamp;
+      window.requestAnimationFrame(this.loop);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js&":
 /*!********************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Map/MapmakerComponent.vue?vue&type=script&lang=js& ***!
@@ -1796,19 +1908,108 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var TOOLS = {
+  PENCIL: 0,
+  ERASER: 1,
+  FILL: 2,
+  RECTANGLE: 3
+};
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['map'],
   data: function data() {
     return {
+      global: window.GLOBAL,
+      gameObjects: window.GAME_OBJECTS,
       canvas: null,
       tileImg: new Image(),
       selectedTile: null,
       mousedown: false,
-      mapData: {
-        w: 640,
-        h: 480,
-        tileData: []
-      }
+      numLayers: 1,
+      selectedLayer: 0,
+      selectedTool: TOOLS.PENCIL
     };
   },
   ready: function ready() {
@@ -1823,25 +2024,7 @@ __webpack_require__.r(__webpack_exports__);
 
       this.canvas = document.getElementById('mapmaker-map');
 
-      if (this.map.data) {
-        this.mapData = JSON.parse(this.map.data);
-      } else {
-        var numMapCols = Math.ceil(this.mapData.w / this.getTileWidth(this.map.tileset));
-        var numMapRows = Math.ceil(this.mapData.h / this.getTileHeight(this.map.tileset));
-        this.mapData.tileData = [];
-
-        for (var i = 0; i < numMapCols; i++) {
-          this.mapData.tileData[i] = [];
-
-          for (var j = 0; j < numMapRows; j++) {
-            this.mapData.tileData[i][j] = {}; // add empty object for now
-          }
-        }
-      }
-
-      this.tileImg.src = this.map.tileset.url;
-
-      this.tileImg.onload = function () {
+      this.gameObjects.map.tileset.image.onload = function () {
         _this.drawTiles();
 
         _this.drawMap();
@@ -1854,7 +2037,11 @@ __webpack_require__.r(__webpack_exports__);
 
           var grid = _this.getGrid(x, y);
 
-          _this.mapData.tileData[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+          if (_this.selectedTool == TOOLS.PENCIL) {
+            _this.gameObjects.map.layers[_this.selectedLayer].data.tiles[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+          } else if (_this.selectedTool == TOOLS.ERASER) {
+            _this.gameObjects.map.layers[_this.selectedLayer].data.tiles[grid.x][grid.y] = {};
+          }
 
           _this.drawMap();
         }
@@ -1866,7 +2053,12 @@ __webpack_require__.r(__webpack_exports__);
         var grid = _this.getGrid(x, y);
 
         _this.mousedown = true;
-        _this.mapData.tileData[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+
+        if (_this.selectedTool == TOOLS.PENCIL) {
+          _this.gameObjects.map.layers[_this.selectedLayer].data.tiles[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+        } else if (_this.selectedTool == TOOLS.ERASER) {
+          _this.gameObjects.map.layers[_this.selectedLayer].data.tiles[grid.x][grid.y] = {};
+        }
 
         _this.drawMap();
       }, false);
@@ -1878,54 +2070,144 @@ __webpack_require__.r(__webpack_exports__);
       }, false);
     },
     getGrid: function getGrid(x, y) {
-      var gridX = x / this.getTileWidth(this.map.tileset);
-      var gridY = y / this.getTileHeight(this.map.tileset);
+      var gridX = x / this.gameObjects.map.tileset.tileSize.w;
+      var gridY = y / this.gameObjects.map.tileset.tileSize.h;
       return {
         x: Math.floor(gridX),
         y: Math.floor(gridY)
       };
     },
     drawMap: function drawMap() {
-      for (var i = 0; i < this.mapData.tileData.length; i++) {
-        for (var j = 0; j < this.mapData.tileData[i].length; j++) {
-          var tile = this.mapData.tileData[i][j];
+      this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.gameObjects.map.draw(this.canvas.getContext('2d'), this.selectedLayer);
+    },
+    drawTiles: function drawTiles() {
+      for (var i = 0; i < window.rawMapData.tileset.tiles.length; i++) {
+        var tile = window.rawMapData.tileset.tiles[i];
 
-          if (tile.id) {
-            var sx = tile.x * this.getTileWidth(this.map.tileset);
-            var sy = tile.y * this.getTileHeight(this.map.tileset);
-            var swidth = this.getTileWidth(this.map.tileset);
-            var sheight = this.getTileHeight(this.map.tileset);
-            var x = this.getTileWidth(this.map.tileset) * i;
-            var y = this.getTileWidth(this.map.tileset) * j;
-            var width = swidth;
-            var height = sheight;
-            this.canvas.getContext('2d').drawImage(this.tileImg, sx, sy, swidth, sheight, x, y, width, height);
-          }
+        if (document.getElementById('tile_' + tile.id)) {
+          var ctx = document.getElementById('tile_' + tile.id).getContext('2d');
+          this.gameObjects.map.tileset.draw(ctx, tile, 0, 0);
         }
       }
     },
-    drawTiles: function drawTiles() {
-      for (var i = 0; i < this.map.tileset.tiles.length; i++) {
-        var tile = this.map.tileset.tiles[i];
-        var tileCanvas = document.getElementById('tile_' + tile.id);
-        var ctx = tileCanvas.getContext('2d');
-        var sx = tile.x * this.getTileWidth(this.map.tileset);
-        var sy = tile.y * this.getTileHeight(this.map.tileset);
-        var swidth = this.getTileWidth(this.map.tileset);
-        var sheight = this.getTileHeight(this.map.tileset);
-        ctx.drawImage(this.tileImg, sx, sy, swidth, sheight, 0, 0, swidth, sheight);
-      }
+    createLayer: function createLayer() {
+      this.gameObjects.map.addBlankLayer();
+      this.drawMap();
     },
-    getTileWidth: function getTileWidth(tileset) {
-      return tileset.image_width / tileset.horizontal_length;
+    selectLayer: function selectLayer(ind) {
+      this.selectedLayer = ind;
+      this.drawMap();
     },
-    getTileHeight: function getTileHeight(tileset) {
-      return tileset.image_height / tileset.vertical_length;
+    updateLayerSettings: function updateLayerSettings() {
+      var url = "/layer/" + this.gameObjects.map.layers[this.selectedLayer].id;
+      var data = {
+        'z_index': this.gameObjects.map.layers[this.selectedLayer].z_index
+      };
+      axios.put(url, data).then(function (response) {
+        console.log(response);
+        alert(response.data.status);
+      }).catch(function (error) {
+        console.log(error);
+      });
     },
     store: function store() {
       var url = "/map/" + this.map.id;
+      var layersData = [];
+      this.gameObjects.map.layers.forEach(function (layer) {
+        layersData.push({
+          z_index: layer.z_index,
+          data: JSON.stringify(layer.data)
+        });
+      });
       var data = {
-        'mapData': JSON.stringify(this.mapData)
+        'layersData': layersData
+      };
+      axios.put(url, data).then(function (response) {
+        console.log(response);
+        alert(response.data.status);
+      }).catch(function (error) {
+        console.log(error);
+      });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["tileset"],
+  data: function data() {
+    return {
+      tilesetObj: new Tileset()
+    };
+  },
+  ready: function ready() {
+    this.prepareComponent();
+  },
+  mounted: function mounted() {
+    this.prepareComponent();
+  },
+  methods: {
+    prepareComponent: function prepareComponent() {
+      var _this = this;
+
+      this.tilesetObj.setData(this.tileset);
+
+      this.tilesetObj.image.onload = function () {
+        _this.draw();
+      };
+    },
+    draw: function draw() {
+      for (var i = 0; i < this.tileset.tiles.length; i++) {
+        var tile = this.tileset.tiles[i];
+
+        if (document.getElementById('tile_' + tile.id)) {
+          var ctx = document.getElementById('tile_' + tile.id).getContext('2d');
+          this.tilesetObj.draw(ctx, tile, 0, 0);
+        }
+      }
+    },
+    store: function store() {
+      var url = "/tileset/" + this.tileset.id;
+      var data = {
+        tiles: this.tileset.tiles
       };
       axios.put(url, data).then(function (response) {
         console.log(response);
@@ -36771,6 +37053,87 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
+/*!*******************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
+  \*******************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm._m(0)
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "row justify-content-center" }, [
+        _c("div", { staticClass: "col-md-8" }, [
+          _c("div", { staticClass: "card card-default" }, [
+            _c("div", { staticClass: "card-header" }, [
+              _vm._v("Example Component")
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "card-body" }, [
+              _vm._v(
+                "\n                    I'm an example component.\n                "
+              )
+            ])
+          ])
+        ])
+      ])
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459&":
+/*!*********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459& ***!
+  \*********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("canvas", {
+      attrs: {
+        id: "game-screen",
+        width:
+          _vm.gameObjects.map.width * _vm.gameObjects.map.tileset.tileSize.w,
+        height:
+          _vm.gameObjects.map.height * _vm.gameObjects.map.tileset.tileSize.h
+      }
+    })
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07&":
 /*!************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Map/MapmakerComponent.vue?vue&type=template&id=3d0e2d07& ***!
@@ -36787,38 +37150,98 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "row" }, [
-    _vm._m(0),
-    _vm._v(" "),
-    _c("div", { staticClass: "col-md-4" }, [
-      _c(
-        "div",
-        { staticClass: "mb-4" },
-        [
-          _vm._l(_vm.map.tileset.tiles, function(tile) {
-            return [
-              _c("canvas", {
-                staticClass: "mapmaker-tile mr-1",
-                class: {
-                  selected: tile == _vm.selectedTile
-                },
-                attrs: {
-                  id: "tile_" + tile.id,
-                  width: _vm.getTileWidth(_vm.map.tileset),
-                  height: _vm.getTileHeight(_vm.map.tileset)
-                },
+    _c("div", { staticClass: "col-md-9" }, [
+      _c("div", { staticClass: "mb-4" }, [
+        _c(
+          "div",
+          { staticClass: "btn-group btn-group-sm", attrs: { role: "group" } },
+          [
+            _vm._l(this.gameObjects.map.layers, function(layer, ind) {
+              return [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-sm btn-secondary",
+                    class: { active: _vm.selectedLayer == ind },
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.selectLayer(ind)
+                      }
+                    }
+                  },
+                  [
+                    _vm._v(
+                      "\n                        " +
+                        _vm._s(ind) +
+                        "\n                    "
+                    )
+                  ]
+                )
+              ]
+            }),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-sm btn-secondary",
+                attrs: { type: "button" },
                 on: {
                   click: function($event) {
-                    _vm.selectedTile = tile
+                    _vm.createLayer()
                   }
                 }
-              })
-            ]
-          })
-        ],
-        2
-      ),
+              },
+              [_vm._v("+")]
+            )
+          ],
+          2
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-sm btn-secondary",
+            attrs: { "data-toggle": "modal", "data-target": "#layer-settings" }
+          },
+          [_vm._v("Layer Settings")]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-sm btn-secondary",
+            attrs: { "data-toggle": "modal", "data-target": "#map-settings" }
+          },
+          [_vm._v("Map Settings")]
+        )
+      ]),
       _vm._v(" "),
-      _c("div", [
+      _c(
+        "div",
+        {
+          staticClass: "w-100",
+          staticStyle: { overflow: "auto", height: "500px" }
+        },
+        [
+          _c("canvas", {
+            staticClass: "mapmaker-map",
+            attrs: {
+              id: "mapmaker-map",
+              width:
+                _vm.gameObjects.map.width *
+                _vm.gameObjects.map.tileset.tileSize.w,
+              height:
+                _vm.gameObjects.map.height *
+                _vm.gameObjects.map.tileset.tileSize.h
+            }
+          })
+        ]
+      )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "col-md-3" }, [
+      _c("div", { staticClass: "mb-4" }, [
         _c(
           "button",
           {
@@ -36831,23 +37254,366 @@ var render = function() {
           },
           [_vm._v("Save")]
         )
-      ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "mb-4" }, [
+        _c("div", { staticClass: "btn-group" }, [
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              class: { active: _vm.selectedTool == 0 },
+              on: {
+                click: function($event) {
+                  _vm.selectedTool = 0
+                }
+              }
+            },
+            [
+              _c("img", {
+                attrs: {
+                  src: "/images/icons/icons8-pencil.png",
+                  width: "16",
+                  height: "16"
+                }
+              })
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              class: { active: _vm.selectedTool == 1 },
+              on: {
+                click: function($event) {
+                  _vm.selectedTool = 1
+                }
+              }
+            },
+            [
+              _c("img", {
+                attrs: {
+                  src: "/images/icons/icons8-eraser.png",
+                  width: "16",
+                  height: "16"
+                }
+              })
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              class: { active: _vm.selectedTool == 2 },
+              on: {
+                click: function($event) {
+                  _vm.selectedTool = 2
+                }
+              }
+            },
+            [
+              _c("img", {
+                attrs: {
+                  src: "/images/icons/icons8-fill_color.png",
+                  width: "16",
+                  height: "16"
+                }
+              })
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              class: { active: _vm.selectedTool == 3 },
+              on: {
+                click: function($event) {
+                  _vm.selectedTool = 3
+                }
+              }
+            },
+            [
+              _c("img", {
+                attrs: {
+                  src: "/images/icons/icons8-rectangle_stroked.png",
+                  width: "16",
+                  height: "16"
+                }
+              })
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "mb-4",
+          staticStyle: { overflow: "auto", height: "500px" }
+        },
+        [
+          _c(
+            "div",
+            {
+              style: {
+                width:
+                  (_vm.gameObjects.map.tileset.tileSize.w + 10) *
+                    _vm.gameObjects.map.tileset.data.horizontal_length +
+                  "px"
+              }
+            },
+            [
+              _vm._l(_vm.map.tileset.tiles, function(tile) {
+                return [
+                  _c("canvas", {
+                    staticClass: "mapmaker-tile mr-1",
+                    class: {
+                      selected: tile == _vm.selectedTile
+                    },
+                    attrs: {
+                      id: "tile_" + tile.id,
+                      width: _vm.gameObjects.map.tileset.tileSize.w,
+                      height: _vm.gameObjects.map.tileset.tileSize.h
+                    },
+                    on: {
+                      click: function($event) {
+                        _vm.selectedTile = tile
+                      }
+                    }
+                  })
+                ]
+              })
+            ],
+            2
+          )
+        ]
+      )
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "map-settings",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel"
+        }
+      },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "form" }, [
+                  _c("div", { staticClass: "font-weight-bold" }, [
+                    _vm._v("Map Settings")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", [_vm._v("Map Width (# Grids)")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.gameObjects.map.width }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", [_vm._v("Map Height (# Grids)")]),
+                    _vm._v(" "),
+                    _c("input", {
+                      staticClass: "form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: _vm.gameObjects.map.height }
+                    })
+                  ])
+                ])
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "layer-settings",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "myModalLabel"
+        }
+      },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c("div", { staticClass: "modal-body" }, [
+                _c("div", { staticClass: "form" }, [
+                  _c("div", { staticClass: "font-weight-bold" }, [
+                    _vm._v("Layer Settings")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", [_vm._v("z-index: ")]),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value:
+                              _vm.gameObjects.map.layers[_vm.selectedLayer]
+                                .z_index,
+                            expression:
+                              "gameObjects.map.layers[selectedLayer].z_index"
+                          }
+                        ],
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.gameObjects.map.layers[_vm.selectedLayer],
+                              "z_index",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "0" } }, [
+                          _vm._v("Below Character")
+                        ]),
+                        _vm._v(" "),
+                        _c("option", { attrs: { value: "20" } }, [
+                          _vm._v("On top of Character")
+                        ])
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary btn-sm",
+                      on: {
+                        click: function($event) {
+                          _vm.updateLayerSettings()
+                        }
+                      }
+                    },
+                    [_vm._v("Update")]
+                  )
+                ])
+              ])
+            ])
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=template&id=23332e76&":
+/*!*******************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=template&id=23332e76& ***!
+  \*******************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("div", { staticClass: "mb-4" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-primary btn-block",
+          on: {
+            click: function($event) {
+              _vm.store()
+            }
+          }
+        },
+        [_vm._v("Save Walkable Tiles")]
+      )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticStyle: { overflow: "auto", height: "600px" } }, [
+      _c(
+        "div",
+        {
+          style: {
+            width:
+              (_vm.tilesetObj.tileSize.w + 10) *
+                _vm.tilesetObj.data.horizontal_length +
+              "px"
+          }
+        },
+        [
+          _vm._l(_vm.tileset.tiles, function(tile) {
+            return [
+              _c("canvas", {
+                staticClass: "mapmaker-tile mr-1",
+                class: {
+                  selected: tile.walkable == 0
+                },
+                attrs: {
+                  id: "tile_" + tile.id,
+                  width:
+                    _vm.tileset.image_width / _vm.tileset.horizontal_length,
+                  height: _vm.tileset.image_height / _vm.tileset.vertical_length
+                },
+                on: {
+                  click: function($event) {
+                    tile.walkable = !tile.walkable
+                  }
+                }
+              })
+            ]
+          })
+        ],
+        2
+      )
     ])
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-md-8" }, [
-      _c("canvas", {
-        staticClass: "mapmaker-map",
-        attrs: { id: "mapmaker-map", width: "600", height: "400" }
-      })
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -48116,15 +48882,58 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./resources/js sync recursive \\.vue$/":
+/*!***********************************!*\
+  !*** ./resources/js sync \.vue$/ ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var map = {
+	"./components/ExampleComponent.vue": "./resources/js/components/ExampleComponent.vue",
+	"./components/Game/GameComponent.vue": "./resources/js/components/Game/GameComponent.vue",
+	"./components/Map/MapmakerComponent.vue": "./resources/js/components/Map/MapmakerComponent.vue",
+	"./components/Tileset/TilesetEditComponent.vue": "./resources/js/components/Tileset/TilesetEditComponent.vue"
+};
+
+
+function webpackContext(req) {
+	var id = webpackContextResolve(req);
+	return __webpack_require__(id);
+}
+function webpackContextResolve(req) {
+	var id = map[req];
+	if(!(id + 1)) { // check for number or string
+		var e = new Error("Cannot find module '" + req + "'");
+		e.code = 'MODULE_NOT_FOUND';
+		throw e;
+	}
+	return id;
+}
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = "./resources/js sync recursive \\.vue$/";
+
+/***/ }),
+
 /***/ "./resources/js/app.js":
 /*!*****************************!*\
   !*** ./resources/js/app.js ***!
   \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _character__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./character */ "./resources/js/character.js");
+/* harmony import */ var _character__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_character__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./resources/js/map.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_map__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tileset */ "./resources/js/tileset.js");
+/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_tileset__WEBPACK_IMPORTED_MODULE_2__);
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -48140,151 +48949,70 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
  *
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('mapmaker-component', __webpack_require__(/*! ./components/Map/MapmakerComponent.vue */ "./resources/js/components/Map/MapmakerComponent.vue").default);
+var files = __webpack_require__("./resources/js sync recursive \\.vue$/");
+
+files.keys().map(function (key) {
+  return Vue.component(key.split('/').pop().split('.')[0], files(key).default);
+});
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-var gameScreen = document.getElementById('game-screen');
-var settings = {
-  upKey: 87,
-  //w
-  downKey: 83,
-  //s
-  leftKey: 65,
-  //a
-  rightKey: 68,
-  //d
-  gridSize: {
-    w: 832 / 13,
-    h: 1344 / 21
-  }
-};
-var store = {
-  'direction': 'S',
-  // N, E, S, W
-  'position': {
-    x: 0,
-    y: 0
-  }
-};
-var characterImg = new Image();
-characterImg.src = '/images/characters/body/male/light.png';
-var tileImg = null;
-var tileWidth = null;
-var tileHeight = null;
-var mapData = null;
 
-if ((typeof map === "undefined" ? "undefined" : _typeof(map)) !== undefined && gameScreen) {
-  tileImg = new Image();
-  tileImg.src = map.tileset.url;
-  mapData = JSON.parse(map.data);
-  tileWidth = map.tileset.image_width / map.tileset.horizontal_length;
-  tileHeight = map.tileset.image_height / map.tileset.vertical_length;
-}
+window.Character = _character__WEBPACK_IMPORTED_MODULE_0___default.a;
 
-function update() {// Update the state of the world for the elapsed time since last render
-}
+window.Map = _map__WEBPACK_IMPORTED_MODULE_1___default.a;
 
-function draw() {
-  var ctx = document.getElementById('game-screen').getContext('2d');
-  ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
-  drawMap(ctx);
-  drawCharacter(ctx);
-}
+window.Tileset = _tileset__WEBPACK_IMPORTED_MODULE_2___default.a;
 
-function drawMap(ctx) {
-  for (var i = 0; i < mapData.tileData.length; i++) {
-    for (var j = 0; j < mapData.tileData[i].length; j++) {
-      var tile = mapData.tileData[i][j];
-      var sx = tile.x * tileWidth;
-      var sy = tile.y * tileHeight;
-      var swidth = tileWidth;
-      var sheight = tileHeight;
-      var x = tileWidth * i;
-      var y = tileWidth * j;
-      var width = swidth;
-      var height = sheight;
-      ctx.drawImage(tileImg, sx, sy, swidth, sheight, x, y, width, height);
+if (window.loadGame) {
+  window.GLOBAL = {
+    //contains data related to game or drawing
+    settings: {
+      upKey: 87,
+      //w
+      downKey: 83,
+      //s
+      leftKey: 65,
+      //a
+      rightKey: 68 //d
+
     }
-  }
+  };
+  window.GAME_OBJECTS = {
+    character: new _character__WEBPACK_IMPORTED_MODULE_0___default.a(),
+    map: new _map__WEBPACK_IMPORTED_MODULE_1___default.a()
+  };
+  initializeMap();
+  initializeCharacter();
 }
 
-function drawCharacter(ctx) {
-  var characterWidth = settings.gridSize.w;
-  var characterHeight = settings.gridSize.h;
-  var sx = 0;
-  var sy = characterHeight * 2;
-
-  if (store.direction == 'N') {
-    sx = 0;
-    sy = 0;
-  }
-
-  if (store.direction == 'S') {
-    sx = 0;
-    sy = characterHeight * 2;
-  }
-
-  if (store.direction == 'E') {
-    sx = 0;
-    sy = characterHeight * 3;
-  }
-
-  if (store.direction == 'W') {
-    sx = 0;
-    sy = characterHeight;
-  }
-
-  var swidth = characterWidth;
-  var sheight = characterHeight;
-  var x = store.position.x;
-  var y = store.position.y;
-  var width = swidth;
-  var height = sheight;
-  ctx.drawImage(characterImg, sx, sy, swidth, sheight, x, y, width, height);
+function initializeCharacter() {
+  window.GAME_OBJECTS.character.setImage('/images/characters/body/male/light.png');
+  window.GAME_OBJECTS.character.setGridSize(832 / 13, 1344 / 21);
+  window.GAME_OBJECTS.character.setMap(window.GAME_OBJECTS.map);
 }
 
-$(document).ready(function () {
-  if (gameScreen) {
-    var loop = function loop(timestamp) {
-      var progress = timestamp - lastRender;
-      update(progress);
-      draw();
-      lastRender = timestamp;
-      window.requestAnimationFrame(loop);
-    };
+function initializeMap() {
+  window.GAME_OBJECTS.map.setDimensions(window.rawMapData.width, window.rawMapData.height);
 
-    var lastRender = 0;
-    window.requestAnimationFrame(loop);
-    $(document).keydown(function (e) {
-      if (e.keyCode == settings.upKey || e.keyCode == 38) {
-        store.direction = 'N';
-        store.position.y -= tileHeight;
-      }
-
-      if (e.keyCode == settings.downKey || e.keyCode == 40) {
-        store.direction = 'S';
-        store.position.y += tileHeight;
-      }
-
-      if (e.keyCode == settings.rightKey || e.keyCode == 39) {
-        store.direction = 'E';
-        store.position.x += tileWidth;
-      }
-
-      if (e.keyCode == settings.leftKey || e.keyCode == 37) {
-        store.direction = 'W';
-        store.position.x -= tileWidth;
-      }
+  if (window.rawMapData.layers.length > 0 && window.rawMapData.layers[0].data) {
+    var layers = [];
+    window.rawMapData.layers.forEach(function (l) {
+      l.data = JSON.parse(l.data);
+      layers.push(l);
     });
+    window.GAME_OBJECTS.map.setLayers(layers);
+  } else {
+    window.GAME_OBJECTS.map.addBlankLayer();
   }
-});
+
+  window.GAME_OBJECTS.map.tileset.setData(window.rawMapData.tileset);
+}
+
 var app = new Vue({
   el: '#app'
 });
@@ -48346,6 +49074,278 @@ if (token) {
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     encrypted: true
 // });
+
+/***/ }),
+
+/***/ "./resources/js/character.js":
+/*!***********************************!*\
+  !*** ./resources/js/character.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Character =
+/*#__PURE__*/
+function () {
+  function Character() {
+    _classCallCheck(this, Character);
+
+    this.image = new Image();
+    this.gridSize = {
+      w: 0,
+      h: 0
+    };
+    this.direction = 'S';
+    this.position = {
+      // in terms of grid x y, not in pixels
+      x: 0,
+      y: 0
+    };
+    this.map = null;
+    this.mapTileSize = {
+      //for movement
+      w: 1,
+      h: 1
+    };
+  }
+
+  _createClass(Character, [{
+    key: "moveUp",
+    value: function moveUp() {
+      this.setDirection('N');
+      if (this.map.checkWalkable(this.position.x, this.position.y - 1)) this.position.y -= 1;
+    }
+  }, {
+    key: "moveDown",
+    value: function moveDown() {
+      this.setDirection('S');
+      if (this.map.checkWalkable(this.position.x, this.position.y + 1)) this.position.y += 1;
+    }
+  }, {
+    key: "moveRight",
+    value: function moveRight() {
+      this.setDirection('E');
+      if (this.map.checkWalkable(this.position.x + 1, this.position.y)) this.position.x += 1;
+    }
+  }, {
+    key: "moveLeft",
+    value: function moveLeft() {
+      this.setDirection('W');
+      if (this.map.checkWalkable(this.position.x - 1, this.position.y)) this.position.x -= 1;
+    }
+  }, {
+    key: "setImage",
+    value: function setImage(src) {
+      this.image.src = src;
+    }
+  }, {
+    key: "setGridSize",
+    value: function setGridSize(w, h) {
+      this.gridSize.w = w;
+      this.gridSize.h = h;
+    }
+  }, {
+    key: "setMap",
+    value: function setMap(map) {
+      this.map = map;
+    }
+  }, {
+    key: "setDirection",
+    value: function setDirection(dir) {
+      this.direction = dir;
+    }
+  }, {
+    key: "setPosition",
+    value: function setPosition(x, y) {
+      this.position.x = x;
+      this.position.y = y;
+    }
+  }, {
+    key: "draw",
+    value: function draw(ctx) {
+      var characterWidth = this.gridSize.w;
+      var characterHeight = this.gridSize.h;
+      var sx = 0;
+      var sy = characterHeight * 2;
+
+      if (this.direction == 'N') {
+        sx = 0;
+        sy = 0;
+      }
+
+      if (this.direction == 'S') {
+        sx = 0;
+        sy = characterHeight * 2;
+      }
+
+      if (this.direction == 'E') {
+        sx = 0;
+        sy = characterHeight * 3;
+      }
+
+      if (this.direction == 'W') {
+        sx = 0;
+        sy = characterHeight;
+      }
+
+      var swidth = characterWidth;
+      var sheight = characterHeight;
+      var x = this.position.x * this.map.tileset.tileSize.w - this.map.tileset.tileSize.w / 2;
+      var y = this.position.y * this.map.tileset.tileSize.h - this.gridSize.h / 2;
+      var width = swidth;
+      var height = sheight;
+      ctx.drawImage(this.image, sx, sy, swidth, sheight, x, y, width, height);
+    }
+  }]);
+
+  return Character;
+}();
+
+module.exports = Character;
+
+/***/ }),
+
+/***/ "./resources/js/components/ExampleComponent.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/components/ExampleComponent.vue ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
+/* harmony import */ var _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ExampleComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ExampleComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
+  \*************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/Game/GameComponent.vue":
+/*!********************************************************!*\
+  !*** ./resources/js/components/Game/GameComponent.vue ***!
+  \********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _GameComponent_vue_vue_type_template_id_1b6c5459___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./GameComponent.vue?vue&type=template&id=1b6c5459& */ "./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459&");
+/* harmony import */ var _GameComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GameComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _GameComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _GameComponent_vue_vue_type_template_id_1b6c5459___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _GameComponent_vue_vue_type_template_id_1b6c5459___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/Game/GameComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************!*\
+  !*** ./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GameComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GameComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459&":
+/*!***************************************************************************************!*\
+  !*** ./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459& ***!
+  \***************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameComponent_vue_vue_type_template_id_1b6c5459___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameComponent.vue?vue&type=template&id=1b6c5459& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameComponent_vue_vue_type_template_id_1b6c5459___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameComponent_vue_vue_type_template_id_1b6c5459___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
 
 /***/ }),
 
@@ -48415,6 +49415,271 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MapmakerComponent_vue_vue_type_template_id_3d0e2d07___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
+
+/***/ }),
+
+/***/ "./resources/js/components/Tileset/TilesetEditComponent.vue":
+/*!******************************************************************!*\
+  !*** ./resources/js/components/Tileset/TilesetEditComponent.vue ***!
+  \******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _TilesetEditComponent_vue_vue_type_template_id_23332e76___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TilesetEditComponent.vue?vue&type=template&id=23332e76& */ "./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=template&id=23332e76&");
+/* harmony import */ var _TilesetEditComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./TilesetEditComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _TilesetEditComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _TilesetEditComponent_vue_vue_type_template_id_23332e76___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _TilesetEditComponent_vue_vue_type_template_id_23332e76___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/Tileset/TilesetEditComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TilesetEditComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./TilesetEditComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_TilesetEditComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=template&id=23332e76&":
+/*!*************************************************************************************************!*\
+  !*** ./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=template&id=23332e76& ***!
+  \*************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TilesetEditComponent_vue_vue_type_template_id_23332e76___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./TilesetEditComponent.vue?vue&type=template&id=23332e76& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Tileset/TilesetEditComponent.vue?vue&type=template&id=23332e76&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TilesetEditComponent_vue_vue_type_template_id_23332e76___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TilesetEditComponent_vue_vue_type_template_id_23332e76___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/map.js":
+/*!*****************************!*\
+  !*** ./resources/js/map.js ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Map =
+/*#__PURE__*/
+function () {
+  function Map() {
+    _classCallCheck(this, Map);
+
+    this.tileset = new Tileset();
+    this.layers = [];
+    this.width = 1;
+    this.height = 1;
+    this.walkable = [];
+  }
+
+  _createClass(Map, [{
+    key: "setLayers",
+    value: function setLayers(layers) {
+      var _this = this;
+
+      this.layers = layers;
+
+      for (var i = 0; i < this.layers[0].data.tiles.length; i++) {
+        var col = this.layers[0].data.tiles[i];
+        this.walkable.push([]);
+
+        for (var j = 0; j < col.length; j++) {
+          this.walkable[i].push(1);
+        }
+      } //generate walkable map for walkability
+
+
+      this.layers.forEach(function (layer, index) {
+        for (var _i = 0; _i < layer.data.tiles.length; _i++) {
+          var _col = layer.data.tiles[_i];
+
+          for (var _j = 0; _j < _col.length; _j++) {
+            var tile = _col[_j];
+
+            if (tile.walkable != null) {
+              _this.walkable[_i][_j] = _this.walkable[_i][_j] & tile.walkable;
+            }
+          }
+        }
+      });
+    }
+  }, {
+    key: "checkWalkable",
+    value: function checkWalkable(x, y) {
+      if (x >= this.walkable.length || x < 0) return false;
+      if (y >= this.walkable[x].length || y < 0) return false;
+      if (this.walkable[x][y] == 0) return false;
+      return true;
+    }
+  }, {
+    key: "setDimensions",
+    value: function setDimensions(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+  }, {
+    key: "addBlankLayer",
+    value: function addBlankLayer() {
+      var newlayer = {};
+      newlayer.data = {};
+      newlayer.data.tiles = new Array(this.width).fill([]);
+
+      for (var j = 0; j < this.height; j++) {
+        newlayer.data.tiles[j] = new Array(this.height).fill({});
+      }
+
+      newlayer.z_index = 0;
+      this.layers.push(newlayer);
+      return newlayer;
+    }
+  }, {
+    key: "draw",
+    value: function draw(ctx) {
+      var _this2 = this;
+
+      var selected = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var z_index = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      this.layers.forEach(function (layer, index) {
+        if (layer.data.tiles && (z_index == null || layer.z_index == z_index)) {
+          if (selected != null && index != selected) {
+            ctx.save();
+            ctx.globalAlpha = 0.4;
+          } else if (selected == null || selected == index) {
+            ctx.save();
+            ctx.globalAlpha = 1;
+          }
+
+          layer.data.tiles.map(function (col, i) {
+            col.map(function (tile, j) {
+              _this2.tileset.draw(ctx, tile, i * _this2.tileset.tileSize.w, j * _this2.tileset.tileSize.h);
+            });
+          });
+
+          if (selected != null && layer != selected) {
+            ctx.restore();
+          }
+        }
+      });
+    }
+  }]);
+
+  return Map;
+}();
+
+module.exports = Map;
+
+/***/ }),
+
+/***/ "./resources/js/tileset.js":
+/*!*********************************!*\
+  !*** ./resources/js/tileset.js ***!
+  \*********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Tileset =
+/*#__PURE__*/
+function () {
+  function Tileset() {
+    _classCallCheck(this, Tileset);
+
+    this.data = {};
+    this.image = new Image();
+    this.tileSize = {
+      w: 1,
+      h: 1
+    }; // w,h
+  }
+
+  _createClass(Tileset, [{
+    key: "setData",
+    value: function setData(data) {
+      this.data = data;
+      this.setImage(this.data.url);
+      this.setTileSize(this.data.image_width / this.data.horizontal_length, this.data.image_height / this.data.vertical_length);
+    }
+  }, {
+    key: "setImage",
+    value: function setImage(src) {
+      this.image.src = src;
+    }
+  }, {
+    key: "setTileSize",
+    value: function setTileSize(w, h) {
+      this.tileSize.w = w;
+      this.tileSize.h = h;
+    }
+  }, {
+    key: "draw",
+    value: function draw(ctx, tile, x_canvas, y_canvas) {
+      if (!tile) return;
+      var sx = tile.x * this.tileSize.w;
+      var sy = tile.y * this.tileSize.h;
+      var swidth = this.tileSize.w;
+      var sheight = this.tileSize.h;
+      var width = swidth;
+      var height = sheight;
+      ctx.drawImage(this.image, sx, sy, swidth, sheight, x_canvas, y_canvas, width, height);
+      /*
+      ctx.beginPath()
+      ctx.rect(x_canvas, y_canvas, width, height)
+      ctx.stroke()
+      ctx.closePath()
+      */
+    }
+  }]);
+
+  return Tileset;
+}();
+
+module.exports = Tileset;
 
 /***/ }),
 

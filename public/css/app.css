@@ -10529,3 +10529,7 @@ main {
   border: 3px solid red;
 }
 
+.mapmaker-tile.disabled {
+  border: 3px solid #ffed4a;
+}
+

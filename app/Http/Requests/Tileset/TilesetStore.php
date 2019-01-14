@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Tileset;
 
+use App\Tile;
 use App\Tileset;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +41,17 @@ class TilesetStore extends FormRequest
             'vertical_length' => 1,
             'type' => ''
         ]);
+
+        for($y = 0; $y < $input['vertical_length']; $y ++) {
+            for($x = 0; $x < $input['horizontal_length']; $x ++) {
+                $tile = Tile::create([
+                    'tileset_id' => $tileset->id,
+                    'x' => $x,
+                    'y' => $y
+                ]);
+            }
+        }
+
 
         return $tileset;
     }

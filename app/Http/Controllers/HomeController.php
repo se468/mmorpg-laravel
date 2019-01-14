@@ -25,7 +25,7 @@ class HomeController extends Controller
     public function index()
     {
         $map = Map::first();
-        $map->load('tileset', 'tileset.tiles');
+        $map->load(['tileset', 'tileset.tiles', 'layers']);
         return view('home', [
             'map' => $map
         ]);

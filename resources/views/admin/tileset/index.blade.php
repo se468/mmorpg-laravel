@@ -33,6 +33,16 @@
                         <input type="file" name="photo" class="form-control-file">
                     </div>
 
+                    <div class="form-group">
+                        <label>Horizontal Length</label>
+                        <input type="text" name="horizontal_length" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vertical Length</label>
+                        <input type="text" name="vertical_length" class="form-control">
+                    </div>
+
                     <input type="submit" class="btn btn-primary btn-block">
                 </form>
             </div>
