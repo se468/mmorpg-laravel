@@ -49538,7 +49538,7 @@ function () {
             var tile = _col[_j];
 
             if (tile.walkable != null) {
-              _this.walkable[_i][_j] = _this.walkable[_i][_j] & tile.walkable;
+              _this.walkable[_i][_j] = _this.walkable[_i][_j] & tile.walkable; //0 아니면 1
             }
           }
         }

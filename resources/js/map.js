@@ -24,7 +24,7 @@ class Map {
                 for (let j = 0; j < col.length; j++) {
                     let tile = col[j]
                     if (tile.walkable != null) {
-                        this.walkable[i][j] = this.walkable[i][j] & tile.walkable
+                        this.walkable[i][j] = this.walkable[i][j] & tile.walkable //0 아니면 1
                     }
                 }
             }
