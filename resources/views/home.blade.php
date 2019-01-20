@@ -1,8 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.app', ['hideNavBar' => true,'isGameScreen' => true])
 
 @section('content')
-<game-component></game-component>
-
+<game-component :user="{{ json_encode(auth()->user()) }}"></game-component>
 @endsection
 
 @section('extra-javascript')

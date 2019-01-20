@@ -20,6 +20,7 @@
 </head>
 <body>
     <div id="app" @if(isset($centerContents))class="d-flex flex-column" @endif>
+        @if(!isset($hideNavBar))
         <nav class="navbar navbar-expand-md navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
@@ -77,9 +78,11 @@
                 </div>
             </div>
         </nav>
+        @endif
         @include('layouts.status')
-        <main @if(isset($centerContents))class="flex-center" @endif>
-            
+        
+        <main class="@if(isset($centerContents))flex-center @endif 
+            @if(isset($isGameScreen)) h-100 @endif)">
             @yield('content')
         </main>
     </div>

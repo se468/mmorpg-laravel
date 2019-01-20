@@ -23,11 +23,14 @@ class TilesetStore extends FormRequest
     public function rules()
     {
         return [
-            'photo' => 'required|file|mimes:jpeg,bmp,png'
+            'photo' => 'required|file|mimes:jpeg,bmp,png',
+            'vertical_length' => 'required',
+            'horizontal_length' => 'required'
         ];
     }
 
     public function persist () {
+        $input = $this->all();
         $file = $this->file('photo');
         $path = Storage::putFile('public', $file, 'public');
         
@@ -37,8 +40,8 @@ class TilesetStore extends FormRequest
             'url' => Storage::url($path),
             'image_width' => $image->width(),
             'image_height' => $image->height(),
-            'horizontal_length' => 1,
-            'vertical_length' => 1,
+            'horizontal_length' => $input['horizontal_length'],
+            'vertical_length' => $input['vertical_length'],
             'type' => ''
         ]);
 

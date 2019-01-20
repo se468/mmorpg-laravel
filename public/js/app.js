@@ -1754,39 +1754,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
-/*!***************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
-  \***************************************************************************************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-/* harmony default export */ __webpack_exports__["default"] = ({
-  mounted: function mounted() {
-    console.log('Component mounted.');
-  }
-});
-
-/***/ }),
-
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js&":
 /*!*****************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Game/GameComponent.vue?vue&type=script&lang=js& ***!
@@ -1806,13 +1773,77 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: [],
+  props: ["user"],
   data: function data() {
     return {
       gameObjects: window.GAME_OBJECTS,
       gameScreen: null,
-      lastRender: 0
+      lastRender: 0,
+      display: null
     };
   },
   ready: function ready() {
@@ -1824,40 +1855,44 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     prepareComponent: function prepareComponent() {
       this.gameScreen = document.getElementById('game-screen');
+      this.display = new Display(this.gameScreen);
       window.requestAnimationFrame(this.loop);
       this.bindKeys();
     },
     bindKeys: function bindKeys() {
       $(document).keydown(function (e) {
         if (e.keyCode == GLOBAL.settings.upKey || e.keyCode == 38) {
-          GAME_OBJECTS.character.moveUp();
+          GAME_OBJECTS.hero.move('N');
         }
 
         if (e.keyCode == GLOBAL.settings.downKey || e.keyCode == 40) {
-          GAME_OBJECTS.character.moveDown();
+          GAME_OBJECTS.hero.move('S');
         }
 
         if (e.keyCode == GLOBAL.settings.rightKey || e.keyCode == 39) {
-          GAME_OBJECTS.character.moveRight();
+          GAME_OBJECTS.hero.move('E');
         }
 
         if (e.keyCode == GLOBAL.settings.leftKey || e.keyCode == 37) {
-          GAME_OBJECTS.character.moveLeft();
+          GAME_OBJECTS.hero.move('W');
+        }
+
+        if (e.keyCode == GLOBAL.settings.actionKey) {
+          GAME_OBJECTS.hero.attack();
         }
       });
     },
-    update: function update() {},
-    draw: function draw() {
-      var ctx = this.gameScreen.getContext('2d');
-      ctx.clearRect(0, 0, this.gameScreen.width, this.gameScreen.height);
-      window.GAME_OBJECTS.map.draw(ctx, null, 0);
-      window.GAME_OBJECTS.character.draw(ctx);
-      window.GAME_OBJECTS.map.draw(ctx, null, 20);
+    update: function update() {
+      window.GAME_OBJECTS.hero.update();
+
+      for (var key in window.GAME_OBJECTS.monsters) {
+        window.GAME_OBJECTS.monsters[key].update();
+      }
     },
     loop: function loop(timestamp) {
       var progress = timestamp - this.lastRender;
       this.update(progress);
-      this.draw();
+      this.display.draw();
       this.lastRender = timestamp;
       window.requestAnimationFrame(this.loop);
     }
@@ -1875,6 +1910,10 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
 //
 //
 //
@@ -2009,7 +2048,8 @@ var TOOLS = {
       mousedown: false,
       numLayers: 1,
       selectedLayer: 0,
-      selectedTool: TOOLS.PENCIL
+      selectedTool: TOOLS.PENCIL,
+      display: null
     };
   },
   ready: function ready() {
@@ -2023,6 +2063,7 @@ var TOOLS = {
       var _this = this;
 
       this.canvas = document.getElementById('mapmaker-map');
+      this.display = new Display(this.canvas);
 
       this.gameObjects.map.tileset.image.onload = function () {
         _this.drawTiles();
@@ -2052,12 +2093,15 @@ var TOOLS = {
 
         var grid = _this.getGrid(x, y);
 
+        var selectedLayer = _this.gameObjects.map.layers[_this.selectedLayer];
         _this.mousedown = true;
 
         if (_this.selectedTool == TOOLS.PENCIL) {
-          _this.gameObjects.map.layers[_this.selectedLayer].data.tiles[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
+          selectedLayer.data.tiles[grid.x][grid.y] = JSON.parse(JSON.stringify(_this.selectedTile));
         } else if (_this.selectedTool == TOOLS.ERASER) {
-          _this.gameObjects.map.layers[_this.selectedLayer].data.tiles[grid.x][grid.y] = {};
+          selectedLayer.data.tiles[grid.x][grid.y] = {};
+        } else if (_this.selectedTool = TOOLS.FILL) {
+          _this.floodfill(grid.x, grid.y, selectedLayer.data.tiles[grid.x][grid.y], _this.selectedTile);
         }
 
         _this.drawMap();
@@ -2069,6 +2113,28 @@ var TOOLS = {
         _this.mousedown = false;
       }, false);
     },
+    floodfill: function floodfill(x, y, targetTile, replacementTile) {
+      if (targetTile == replacementTile || targetTile.id == replacementTile.id) return; //already same
+
+      var selectedLayer = this.gameObjects.map.layers[this.selectedLayer];
+      if (x < 0 || x > selectedLayer.data.tiles.length - 1) return; //size don't make sense
+
+      if (y < 0 || y > selectedLayer.data.tiles[0].length - 1) return; //size don't make sense
+
+      if (selectedLayer.data.tiles[x][y].x != targetTile.x || selectedLayer.data.tiles[x][y].y != targetTile.y) return; //this is not the target tile to replace
+
+      selectedLayer.data.tiles[x][y] = JSON.parse(JSON.stringify(replacementTile)); //set the color of the node to replace color
+
+      this.floodfill(x, y + 1, targetTile, replacementTile); //south
+
+      this.floodfill(x, y - 1, targetTile, replacementTile); //north
+
+      this.floodfill(x - 1, y, targetTile, replacementTile); //west
+
+      this.floodfill(x + 1, y, targetTile, replacementTile); //east
+
+      return;
+    },
     getGrid: function getGrid(x, y) {
       var gridX = x / this.gameObjects.map.tileset.tileSize.w;
       var gridY = y / this.gameObjects.map.tileset.tileSize.h;
@@ -2079,7 +2145,7 @@ var TOOLS = {
     },
     drawMap: function drawMap() {
       this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.gameObjects.map.draw(this.canvas.getContext('2d'), this.selectedLayer);
+      this.display.drawMap(this.selectedLayer);
     },
     drawTiles: function drawTiles() {
       for (var i = 0; i < window.rawMapData.tileset.tiles.length; i++) {
@@ -2093,6 +2159,7 @@ var TOOLS = {
     },
     createLayer: function createLayer() {
       this.gameObjects.map.addBlankLayer();
+      this.selectedLayer = this.gameObjects.map.layers.length - 1;
       this.drawMap();
     },
     selectLayer: function selectLayer(ind) {
@@ -2212,6 +2279,91 @@ __webpack_require__.r(__webpack_exports__);
       axios.put(url, data).then(function (response) {
         console.log(response);
         alert(response.data.status);
+      }).catch(function (error) {
+        console.log(error);
+      });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/EquipmentComponent.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/UI/EquipmentComponent.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: [],
+  data: function data() {
+    return {};
+  },
+  ready: function ready() {
+    this.prepareComponent();
+  },
+  mounted: function mounted() {
+    this.prepareComponent();
+  },
+  methods: {
+    prepareComponent: function prepareComponent() {}
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/ProgressComponent.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/UI/ProgressComponent.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["min", "max", "data", "cls"],
+  data: function data() {
+    return {};
+  },
+  ready: function ready() {
+    this.prepareComponent();
+  },
+  mounted: function mounted() {
+    this.prepareComponent();
+  },
+  methods: {
+    prepareComponent: function prepareComponent() {},
+    store: function store() {
+      var url = "";
+      axios.post(url, data).then(function (response) {
+        console.log(response);
       }).catch(function (error) {
         console.log(error);
       });
@@ -37053,53 +37205,6 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
-/*!*******************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
-  \*******************************************************************************************************************************************************************************************************************/
-/*! exports provided: render, staticRenderFns */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _vm._m(0)
-}
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "row justify-content-center" }, [
-        _c("div", { staticClass: "col-md-8" }, [
-          _c("div", { staticClass: "card card-default" }, [
-            _c("div", { staticClass: "card-header" }, [
-              _vm._v("Example Component")
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [
-              _vm._v(
-                "\n                    I'm an example component.\n                "
-              )
-            ])
-          ])
-        ])
-      ])
-    ])
-  }
-]
-render._withStripped = true
-
-
-
-/***/ }),
-
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459&":
 /*!*********************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Game/GameComponent.vue?vue&type=template&id=1b6c5459& ***!
@@ -37115,16 +37220,125 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("canvas", {
-      attrs: {
-        id: "game-screen",
-        width:
-          _vm.gameObjects.map.width * _vm.gameObjects.map.tileset.tileSize.w,
-        height:
-          _vm.gameObjects.map.height * _vm.gameObjects.map.tileset.tileSize.h
-      }
-    })
+  return _c("div", { staticClass: "container-fluid h-100" }, [
+    _c("div", { staticClass: "row h-100" }, [
+      _c(
+        "div",
+        {
+          staticClass: "col-md-9 flex-center",
+          staticStyle: { background: "black" }
+        },
+        [
+          _c("canvas", {
+            attrs: {
+              id: "game-screen",
+              width:
+                _vm.gameObjects.map.width *
+                _vm.gameObjects.map.tileset.tileSize.w,
+              height:
+                _vm.gameObjects.map.height *
+                _vm.gameObjects.map.tileset.tileSize.h
+            }
+          })
+        ]
+      ),
+      _vm._v(" "),
+      _c("div", { staticClass: "col-md-3" }, [
+        _c("div", { staticClass: "font-weight-bold text-center mt-2 mb-2" }, [
+          _vm._v(
+            "\n               맵:  " +
+              _vm._s(_vm.gameObjects.map.name) +
+              " | (x: " +
+              _vm._s(_vm.gameObjects.hero.position.x) +
+              ", y: " +
+              _vm._s(_vm.gameObjects.hero.position.y) +
+              ")\n            "
+          )
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "font-weight-bold text-center mt-2 mb-2" }, [
+          _vm._v("\n               " + _vm._s(_vm.user.name) + "\n            ")
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "mb-2" }, [
+          _c("div", { staticClass: "row" }, [
+            _c("div", { staticClass: "col-1" }, [
+              _vm._v("\n                        HP\n                    ")
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "col-11" },
+              [
+                _c("progress-component", {
+                  attrs: {
+                    cls: "bg-danger",
+                    min: 0,
+                    max: 10,
+                    data: _vm.gameObjects.hero.hp
+                  }
+                })
+              ],
+              1
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "mb-2" }, [
+          _c("div", { staticClass: "row" }, [
+            _c("div", { staticClass: "col-1" }, [
+              _vm._v("\n                        SP\n                    ")
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "col-11" },
+              [
+                _c("progress-component", {
+                  attrs: {
+                    cls: "bg-primary",
+                    min: 0,
+                    max: 10,
+                    data: _vm.gameObjects.hero.sp
+                  }
+                })
+              ],
+              1
+            )
+          ])
+        ]),
+        _vm._v(
+          "\n            " +
+            _vm._s(_vm.gameObjects.hero.target) +
+            "\n            "
+        ),
+        _vm.gameObjects.hero.target
+          ? _c(
+              "div",
+              { staticClass: "mb-2" },
+              [
+                _c("progress-component", {
+                  attrs: {
+                    cls: "bg-danger",
+                    min: 0,
+                    max: 10,
+                    data: _vm.gameObjects.hero.target.hp
+                  }
+                })
+              ],
+              1
+            )
+          : _vm._e(),
+        _vm._v(" "),
+        _c("div", { staticClass: "mb-2" }, [
+          _vm._v("\n                장비\n            ")
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "mb-2" }, [
+          _vm._v("\n                가방\n            ")
+        ])
+      ])
+    ])
   ])
 }
 var staticRenderFns = []
@@ -37152,6 +37366,10 @@ var render = function() {
   return _c("div", { staticClass: "row" }, [
     _c("div", { staticClass: "col-md-9" }, [
       _c("div", { staticClass: "mb-4" }, [
+        _c("button", { staticClass: "btn btn-sm btn-secondary" }, [
+          _vm._v("Events")
+        ]),
+        _vm._v(" "),
         _c(
           "div",
           { staticClass: "btn-group btn-group-sm", attrs: { role: "group" } },
@@ -37198,23 +37416,7 @@ var render = function() {
           2
         ),
         _vm._v(" "),
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-sm btn-secondary",
-            attrs: { "data-toggle": "modal", "data-target": "#layer-settings" }
-          },
-          [_vm._v("Layer Settings")]
-        ),
-        _vm._v(" "),
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-sm btn-secondary",
-            attrs: { "data-toggle": "modal", "data-target": "#map-settings" }
-          },
-          [_vm._v("Map Settings")]
-        )
+        _vm._m(0)
       ]),
       _vm._v(" "),
       _c(
@@ -37536,7 +37738,32 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "float-right" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-sm btn-secondary",
+          attrs: { "data-toggle": "modal", "data-target": "#layer-settings" }
+        },
+        [_vm._v("Layer Settings")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-sm btn-secondary",
+          attrs: { "data-toggle": "modal", "data-target": "#map-settings" }
+        },
+        [_vm._v("Map Settings")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -37611,6 +37838,72 @@ var render = function() {
         2
       )
     ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/EquipmentComponent.vue?vue&type=template&id=6e83144f&":
+/*!************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/UI/EquipmentComponent.vue?vue&type=template&id=6e83144f& ***!
+  \************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div")
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/ProgressComponent.vue?vue&type=template&id=2d3c78c0&":
+/*!***********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/UI/ProgressComponent.vue?vue&type=template&id=2d3c78c0& ***!
+  \***********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "progress" }, [
+    _c(
+      "div",
+      {
+        staticClass: "progress-bar",
+        class: _vm.cls,
+        style: {
+          width: (_vm.data / _vm.max) * 100 + "%"
+        },
+        attrs: {
+          role: "progressbar",
+          "aria-valuenow": _vm.data,
+          "aria-valuemin": _vm.min,
+          "aria-valuemax": _vm.max
+        }
+      },
+      [_vm._v("\n        " + _vm._s(_vm.data) + "\n    ")]
+    )
   ])
 }
 var staticRenderFns = []
@@ -48890,10 +49183,11 @@ module.exports = function(module) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./components/ExampleComponent.vue": "./resources/js/components/ExampleComponent.vue",
 	"./components/Game/GameComponent.vue": "./resources/js/components/Game/GameComponent.vue",
 	"./components/Map/MapmakerComponent.vue": "./resources/js/components/Map/MapmakerComponent.vue",
-	"./components/Tileset/TilesetEditComponent.vue": "./resources/js/components/Tileset/TilesetEditComponent.vue"
+	"./components/Tileset/TilesetEditComponent.vue": "./resources/js/components/Tileset/TilesetEditComponent.vue",
+	"./components/UI/EquipmentComponent.vue": "./resources/js/components/UI/EquipmentComponent.vue",
+	"./components/UI/ProgressComponent.vue": "./resources/js/components/UI/ProgressComponent.vue"
 };
 
 
@@ -48928,12 +49222,16 @@ webpackContext.id = "./resources/js sync recursive \\.vue$/";
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _character__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./character */ "./resources/js/character.js");
-/* harmony import */ var _character__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_character__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./resources/js/map.js");
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_map__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tileset */ "./resources/js/tileset.js");
-/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_tileset__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./display */ "./resources/js/display.js");
+/* harmony import */ var _display__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_display__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _hero__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./hero */ "./resources/js/hero.js");
+/* harmony import */ var _hero__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_hero__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _monster__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./monster */ "./resources/js/monster.js");
+/* harmony import */ var _monster__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_monster__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ "./resources/js/map.js");
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_map__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./tileset */ "./resources/js/tileset.js");
+/* harmony import */ var _tileset__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_tileset__WEBPACK_IMPORTED_MODULE_4__);
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -48962,11 +49260,15 @@ files.keys().map(function (key) {
  */
 
 
-window.Character = _character__WEBPACK_IMPORTED_MODULE_0___default.a;
+window.Display = _display__WEBPACK_IMPORTED_MODULE_0___default.a;
 
-window.Map = _map__WEBPACK_IMPORTED_MODULE_1___default.a;
+window.Hero = _hero__WEBPACK_IMPORTED_MODULE_1___default.a;
 
-window.Tileset = _tileset__WEBPACK_IMPORTED_MODULE_2___default.a;
+window.Monster = _monster__WEBPACK_IMPORTED_MODULE_2___default.a;
+
+window.Map = _map__WEBPACK_IMPORTED_MODULE_3___default.a;
+
+window.Tileset = _tileset__WEBPACK_IMPORTED_MODULE_4___default.a;
 
 if (window.loadGame) {
   window.GLOBAL = {
@@ -48978,25 +49280,60 @@ if (window.loadGame) {
       //s
       leftKey: 65,
       //a
-      rightKey: 68 //d
+      rightKey: 68,
+      //d
+      actionKey: 32 //space
 
     }
   };
   window.GAME_OBJECTS = {
-    character: new _character__WEBPACK_IMPORTED_MODULE_0___default.a(),
-    map: new _map__WEBPACK_IMPORTED_MODULE_1___default.a()
+    hero: new _hero__WEBPACK_IMPORTED_MODULE_1___default.a(),
+    monsters: {
+      orc: new _monster__WEBPACK_IMPORTED_MODULE_2___default.a(),
+      skeleton: new _monster__WEBPACK_IMPORTED_MODULE_2___default.a()
+    },
+    map: new _map__WEBPACK_IMPORTED_MODULE_3___default.a()
   };
   initializeMap();
   initializeCharacter();
+  initializeMonsters();
 }
 
 function initializeCharacter() {
-  window.GAME_OBJECTS.character.setImage('/images/characters/body/male/light.png');
-  window.GAME_OBJECTS.character.setGridSize(832 / 13, 1344 / 21);
-  window.GAME_OBJECTS.character.setMap(window.GAME_OBJECTS.map);
+  window.GAME_OBJECTS.hero.setImage('/images/characters/body/male/light.png');
+  window.GAME_OBJECTS.hero.setGridSize(832 / 13, 1344 / 21);
+  window.GAME_OBJECTS.hero.setMap(window.GAME_OBJECTS.map);
+  window.GAME_OBJECTS.hero.setPosition(10, 10);
+  window.GAME_OBJECTS.hero.equipments.hair.src = '/images/characters/hair/male/messy1/black.png';
+  window.GAME_OBJECTS.hero.equipments.feet.src = '/images/characters/feet/armor/male/golden_boots_male.png';
+  window.GAME_OBJECTS.hero.equipments.legs.src = '/images/characters/legs/armor/male/golden_greaves_male.png';
+  window.GAME_OBJECTS.hero.equipments.torso.src = '/images/characters/torso/gold/arms_male.png';
+  window.GAME_OBJECTS.hero.equipments.righthand.src = '/images/characters/weapons/right hand/male/spear_male.png';
+  window.GAME_OBJECTS.hero.equipments.lefthand.src = '/images/characters/weapons/left hand/male/shield_male_cutoutforbody.png';
+  window.GAME_OBJECTS.map.addCharacter(window.GAME_OBJECTS.hero);
+}
+
+function initializeMonsters() {
+  window.GAME_OBJECTS.monsters.orc.setImage('/images/characters/body/male/orc.png');
+  window.GAME_OBJECTS.monsters.orc.setGridSize(832 / 13, 1344 / 21);
+  window.GAME_OBJECTS.monsters.orc.setMap(window.GAME_OBJECTS.map);
+  window.GAME_OBJECTS.monsters.orc.setPosition(5, 5);
+  window.GAME_OBJECTS.monsters.orc.equipments.righthand.src = '/images/characters/weapons/right hand/male/spear_male.png';
+  window.GAME_OBJECTS.monsters.orc.equipments.legs.src = '/images/characters/legs/pants/male/magenta_pants_male.png';
+  window.GAME_OBJECTS.monsters.orc.equipments.torso.src = '/images/characters/torso/leather/chest_male.png';
+  window.GAME_OBJECTS.map.addCharacter(window.GAME_OBJECTS.monsters.orc);
+  window.GAME_OBJECTS.monsters.skeleton.setImage('/images/characters/body/male/skeleton.png');
+  window.GAME_OBJECTS.monsters.skeleton.setGridSize(832 / 13, 1344 / 21);
+  window.GAME_OBJECTS.monsters.skeleton.setMap(window.GAME_OBJECTS.map);
+  window.GAME_OBJECTS.monsters.skeleton.setPosition(12, 12);
+  window.GAME_OBJECTS.monsters.skeleton.equipments.torso.src = '/images/characters/torso/shirts/longsleeve/male/teal_longsleeve.png';
+  window.GAME_OBJECTS.monsters.skeleton.equipments.legs.src = '/images/characters/legs/pants/male/red_pants_male.png';
+  window.GAME_OBJECTS.monsters.skeleton.equipments.righthand.src = '/images/characters/weapons/right hand/male/spear_male.png';
+  window.GAME_OBJECTS.map.addCharacter(window.GAME_OBJECTS.monsters.skeleton);
 }
 
 function initializeMap() {
+  window.GAME_OBJECTS.map.name = window.rawMapData.name;
   window.GAME_OBJECTS.map.setDimensions(window.rawMapData.width, window.rawMapData.height);
 
   if (window.rawMapData.layers.length > 0 && window.rawMapData.layers[0].data) {
@@ -49082,13 +49419,15 @@ if (token) {
   !*** ./resources/js/character.js ***!
   \***********************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+STATE = __webpack_require__(/*! ./state */ "./resources/js/state.js");
 
 var Character =
 /*#__PURE__*/
@@ -49103,41 +49442,97 @@ function () {
     };
     this.direction = 'S';
     this.position = {
-      // in terms of grid x y, not in pixels
+      x: 0,
+      y: 0
+    };
+    this.prevPosition = {
       x: 0,
       y: 0
     };
     this.map = null;
     this.mapTileSize = {
-      //for movement
       w: 1,
       h: 1
     };
+    this.equipments = {
+      'hair': new Image(),
+      'feet': new Image(),
+      'legs': new Image(),
+      'torso': new Image(),
+      'lefthand': new Image(),
+      'righthand': new Image()
+    };
+    this.hp = 10;
+    this.sp = 10;
+    /** Animtations */
+
+    this.animating = false;
+    this.motion = 0;
+    this.frames = 8;
+    this.state = STATE.IDLE;
+    this.gotAttacked = false;
+    this.damageAnim = 0;
   }
 
   _createClass(Character, [{
-    key: "moveUp",
-    value: function moveUp() {
-      this.setDirection('N');
-      if (this.map.checkWalkable(this.position.x, this.position.y - 1)) this.position.y -= 1;
+    key: "move",
+    value: function move(dir) {
+      if (this.animating || this.state == STATE.DEAD) return;
+      this.setDirection(dir);
+      if (dir == 'N' && this.map.checkWalkable(this.position.x, this.position.y - 1)) this.position.y -= 1;
+      if (dir == 'S' && this.map.checkWalkable(this.position.x, this.position.y + 1)) this.position.y += 1;
+      if (dir == 'E' && this.map.checkWalkable(this.position.x + 1, this.position.y)) this.position.x += 1;
+      if (dir == 'W' && this.map.checkWalkable(this.position.x - 1, this.position.y)) this.position.x -= 1;
+      this.setState(STATE.MOVING);
     }
   }, {
-    key: "moveDown",
-    value: function moveDown() {
-      this.setDirection('S');
-      if (this.map.checkWalkable(this.position.x, this.position.y + 1)) this.position.y += 1;
+    key: "attack",
+    value: function attack() {
+      if (this.animating || this.state == STATE.DEAD) return;
+      this.setState(STATE.ATTACKING);
+      var x = this.position.x;
+      if (this.direction == "W") x = x - 1;
+      if (this.direction == "E") x = x + 1;
+      var y = this.position.y;
+      if (this.direction == "N") y = y - 1;
+      if (this.direction == "S") y = y + 1;
+      this.map.attack(x, y, this);
     }
   }, {
-    key: "moveRight",
-    value: function moveRight() {
-      this.setDirection('E');
-      if (this.map.checkWalkable(this.position.x + 1, this.position.y)) this.position.x += 1;
+    key: "setState",
+    value: function setState(state) {
+      this.state = state;
+      this.motion = 0;
+
+      if (state == STATE.IDLE) {
+        this.animating = false;
+      }
+
+      if (state == STATE.MOVING) {
+        this.animating = true;
+        this.frames = 8;
+      }
+
+      if (state == STATE.ATTACKING) {
+        this.animating = true;
+        this.frames = 7;
+      }
+
+      if (state == STATE.DYING) {
+        this.animating = true;
+        this.frames = 5;
+      }
     }
   }, {
-    key: "moveLeft",
-    value: function moveLeft() {
-      this.setDirection('W');
-      if (this.map.checkWalkable(this.position.x - 1, this.position.y)) this.position.x -= 1;
+    key: "takeDamage",
+    value: function takeDamage(attacker) {
+      if (this.state == STATE.DEAD) return;
+      this.lookAtDirection(attacker.position.x, attacker.position.y);
+      this.hp--;
+      this.gotAttacked = true;
+      this.damageAnim = 0;
+      this.state = STATE.IN_COMBAT;
+      if (this.hp <= 0) this.die();
     }
   }, {
     key: "setImage",
@@ -49156,51 +49551,68 @@ function () {
       this.map = map;
     }
   }, {
+    key: "lookAtDirection",
+    value: function lookAtDirection(x, y) {
+      if (x < this.position.x) this.setDirection("W");
+      if (x > this.position.x) this.setDirection("E");
+      if (y < this.position.y) this.setDirection("N");
+      if (y > this.position.y) this.setDirection("S");
+    }
+  }, {
     key: "setDirection",
     value: function setDirection(dir) {
       this.direction = dir;
+    }
+  }, {
+    key: "isNextToPosition",
+    value: function isNextToPosition(x, y) {
+      if (Math.abs(this.position.x - x) == 1 && Math.abs(this.position.y - y) == 0 || Math.abs(this.position.x - x) == 0 && Math.abs(this.position.y - y) == 1) return true;
+      return false;
     }
   }, {
     key: "setPosition",
     value: function setPosition(x, y) {
       this.position.x = x;
       this.position.y = y;
+      this.prevPosition.x = x;
+      this.prevPosition.y = y;
     }
   }, {
-    key: "draw",
-    value: function draw(ctx) {
-      var characterWidth = this.gridSize.w;
-      var characterHeight = this.gridSize.h;
-      var sx = 0;
-      var sy = characterHeight * 2;
+    key: "die",
+    value: function die() {
+      this.setState(STATE.DYING); // dispatch character dead event
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      if (this.animating) this.updateAnimation();
 
-      if (this.direction == 'N') {
-        sx = 0;
-        sy = 0;
+      if (this.gotAttacked) {
+        this.damageAnim++;
+
+        if (this.damageAnim > 7) {
+          this.damageAnim = 0;
+          this.gotAttacked = false;
+        }
       }
+    }
+  }, {
+    key: "updateAnimation",
+    value: function updateAnimation() {
+      this.motion += 1;
 
-      if (this.direction == 'S') {
-        sx = 0;
-        sy = characterHeight * 2;
+      if (this.motion > this.frames * 2) {
+        this.motion = 0;
+        this.prevPosition.x = this.position.x;
+        this.prevPosition.y = this.position.y;
+        this.animating = false;
+        this.updateStateAfterAnimation();
       }
-
-      if (this.direction == 'E') {
-        sx = 0;
-        sy = characterHeight * 3;
-      }
-
-      if (this.direction == 'W') {
-        sx = 0;
-        sy = characterHeight;
-      }
-
-      var swidth = characterWidth;
-      var sheight = characterHeight;
-      var x = this.position.x * this.map.tileset.tileSize.w - this.map.tileset.tileSize.w / 2;
-      var y = this.position.y * this.map.tileset.tileSize.h - this.gridSize.h / 2;
-      var width = swidth;
-      var height = sheight;
-      ctx.drawImage(this.image, sx, sy, swidth, sheight, x, y, width, height);
+    }
+  }, {
+    key: "updateStateAfterAnimation",
+    value: function updateStateAfterAnimation() {
+      if (this.state == STATE.DYING || this.state == STATE.DEAD) this.setState(STATE.DEAD);else this.setState(STATE.IDLE);
     }
   }]);
 
@@ -49208,75 +49620,6 @@ function () {
 }();
 
 module.exports = Character;
-
-/***/ }),
-
-/***/ "./resources/js/components/ExampleComponent.vue":
-/*!******************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue ***!
-  \******************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
-/* harmony import */ var _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-
-
-
-
-
-/* normalize component */
-
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
-  _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["render"],
-  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "resources/js/components/ExampleComponent.vue"
-/* harmony default export */ __webpack_exports__["default"] = (component.exports);
-
-/***/ }),
-
-/***/ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
-/*!*******************************************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
-  \*******************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ExampleComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
-
-/***/ }),
-
-/***/ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
-/*!*************************************************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
-  \*************************************************************************************/
-/*! exports provided: render, staticRenderFns */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
-
-
 
 /***/ }),
 
@@ -49487,6 +49830,325 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/UI/EquipmentComponent.vue":
+/*!***********************************************************!*\
+  !*** ./resources/js/components/UI/EquipmentComponent.vue ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _EquipmentComponent_vue_vue_type_template_id_6e83144f___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EquipmentComponent.vue?vue&type=template&id=6e83144f& */ "./resources/js/components/UI/EquipmentComponent.vue?vue&type=template&id=6e83144f&");
+/* harmony import */ var _EquipmentComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EquipmentComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/UI/EquipmentComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _EquipmentComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _EquipmentComponent_vue_vue_type_template_id_6e83144f___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _EquipmentComponent_vue_vue_type_template_id_6e83144f___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/UI/EquipmentComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/UI/EquipmentComponent.vue?vue&type=script&lang=js&":
+/*!************************************************************************************!*\
+  !*** ./resources/js/components/UI/EquipmentComponent.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./EquipmentComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/EquipmentComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/UI/EquipmentComponent.vue?vue&type=template&id=6e83144f&":
+/*!******************************************************************************************!*\
+  !*** ./resources/js/components/UI/EquipmentComponent.vue?vue&type=template&id=6e83144f& ***!
+  \******************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentComponent_vue_vue_type_template_id_6e83144f___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./EquipmentComponent.vue?vue&type=template&id=6e83144f& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/EquipmentComponent.vue?vue&type=template&id=6e83144f&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentComponent_vue_vue_type_template_id_6e83144f___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentComponent_vue_vue_type_template_id_6e83144f___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/UI/ProgressComponent.vue":
+/*!**********************************************************!*\
+  !*** ./resources/js/components/UI/ProgressComponent.vue ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ProgressComponent_vue_vue_type_template_id_2d3c78c0___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ProgressComponent.vue?vue&type=template&id=2d3c78c0& */ "./resources/js/components/UI/ProgressComponent.vue?vue&type=template&id=2d3c78c0&");
+/* harmony import */ var _ProgressComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ProgressComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/UI/ProgressComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ProgressComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ProgressComponent_vue_vue_type_template_id_2d3c78c0___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ProgressComponent_vue_vue_type_template_id_2d3c78c0___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/UI/ProgressComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/UI/ProgressComponent.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/UI/ProgressComponent.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ProgressComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./ProgressComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/ProgressComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ProgressComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/UI/ProgressComponent.vue?vue&type=template&id=2d3c78c0&":
+/*!*****************************************************************************************!*\
+  !*** ./resources/js/components/UI/ProgressComponent.vue?vue&type=template&id=2d3c78c0& ***!
+  \*****************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ProgressComponent_vue_vue_type_template_id_2d3c78c0___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./ProgressComponent.vue?vue&type=template&id=2d3c78c0& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UI/ProgressComponent.vue?vue&type=template&id=2d3c78c0&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ProgressComponent_vue_vue_type_template_id_2d3c78c0___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ProgressComponent_vue_vue_type_template_id_2d3c78c0___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/display.js":
+/*!*********************************!*\
+  !*** ./resources/js/display.js ***!
+  \*********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Display =
+/*#__PURE__*/
+function () {
+  function Display(canvas) {
+    _classCallCheck(this, Display);
+
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d');
+    this.map = window.GAME_OBJECTS.map;
+    this.hero = window.GAME_OBJECTS.hero;
+    this.monsters = window.GAME_OBJECTS.monsters;
+  }
+
+  _createClass(Display, [{
+    key: "draw",
+    value: function draw() {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.drawMap(null, 0);
+
+      for (var key in this.monsters) {
+        this.drawCharacter(this.monsters[key]);
+      }
+
+      this.drawCharacter(this.hero);
+      this.drawMap(null, 20);
+    }
+    /** Map Drawing */
+
+  }, {
+    key: "drawMap",
+    value: function drawMap() {
+      var _this = this;
+
+      var selected = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var z_index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      this.map.layers.forEach(function (layer, index) {
+        if (_this.shouldDrawLayer(layer, z_index)) {
+          _this.ctx.save();
+
+          if (selected != null && index != selected) _this.ctx.globalAlpha = 0.4;else _this.ctx.globalAlpha = 1;
+          layer.data.tiles.map(function (col, i) {
+            col.map(function (tile, j) {
+              _this.map.tileset.draw(_this.ctx, tile, i * _this.map.tileset.tileSize.w, j * _this.map.tileset.tileSize.h);
+            });
+          });
+
+          _this.ctx.restore();
+        }
+      });
+    }
+  }, {
+    key: "shouldDrawLayer",
+    value: function shouldDrawLayer(layer, z_index) {
+      return layer.data.tiles && (z_index == null || layer.z_index == z_index);
+    }
+    /** Character Drawing */
+
+  }, {
+    key: "drawCharacter",
+    value: function drawCharacter(character) {
+      var characterWidth = character.gridSize.w;
+      var characterHeight = character.gridSize.h;
+      var spos = this.getSpritePosition(character);
+      var sx = spos.x;
+      var sy = spos.y;
+      var swidth = characterWidth;
+      var sheight = characterHeight;
+      var x = character.animating ? character.prevPosition.x + (character.position.x - character.prevPosition.x) * character.motion / (2 * character.frames) : character.position.x;
+      x *= character.map.tileset.tileSize.w;
+      x -= character.map.tileset.tileSize.w / 2;
+      var y = character.animating ? character.prevPosition.y + (character.position.y - character.prevPosition.y) * character.motion / (2 * character.frames) : character.position.y;
+      y *= character.map.tileset.tileSize.h;
+      y -= character.gridSize.h / 2;
+      var width = swidth;
+      var height = sheight;
+      this.ctx.save();
+      if (character.gotAttacked && character.state == STATE.IN_COMBAT) this.ctx.globalAlpha = 0.4;else this.ctx.globalAlpha = 1;
+      this.ctx.drawImage(character.image, sx, sy, swidth, sheight, x, y, width, height);
+
+      for (var key in character.equipments) {
+        this.ctx.drawImage(character.equipments[key], sx, sy, swidth, sheight, x, y, width, height);
+      }
+
+      this.ctx.restore();
+    }
+  }, {
+    key: "getSpritePosition",
+    value: function getSpritePosition(character) {
+      var characterWidth = character.gridSize.w;
+      var characterHeight = character.gridSize.h;
+      if (character.state == STATE.DEAD) return {
+        x: characterWidth * 5,
+        y: 20 * characterHeight
+      };
+      var sx = characterWidth * Math.round(character.motion / 2);
+      var sy = characterHeight * 2;
+
+      if (character.direction == 'N') {
+        if (character.state == STATE.ATTACKING) sy = 4 * characterHeight;else if (character.state == STATE.DYING) sy = 20 * characterHeight;else sy = 8 * characterHeight;
+      }
+
+      if (character.direction == 'W') {
+        if (character.state == STATE.ATTACKING) sy = 5 * characterHeight;else if (character.state == STATE.DYING) sy = 20 * characterHeight;else sy = 9 * characterHeight;
+      }
+
+      if (character.direction == 'S') {
+        if (character.state == STATE.ATTACKING) sy = 6 * characterHeight;else if (character.state == STATE.DYING) sy = 20 * characterHeight;else sy = 10 * characterHeight;
+      }
+
+      if (character.direction == 'E') {
+        if (character.state == STATE.ATTACKING) sy = 7 * characterHeight;else if (character.state == STATE.DYING) sy = 20 * characterHeight;else sy = 11 * characterHeight;
+      }
+
+      return {
+        x: sx,
+        y: sy
+      };
+    }
+  }]);
+
+  return Display;
+}();
+
+module.exports = Display;
+
+/***/ }),
+
+/***/ "./resources/js/hero.js":
+/*!******************************!*\
+  !*** ./resources/js/hero.js ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+Character = __webpack_require__(/*! ./character */ "./resources/js/character.js");
+
+var Hero =
+/*#__PURE__*/
+function (_Character) {
+  _inherits(Hero, _Character);
+
+  function Hero() {
+    _classCallCheck(this, Hero);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Hero).call(this));
+  }
+
+  return Hero;
+}(Character);
+
+module.exports = Hero;
+
+/***/ }),
+
 /***/ "./resources/js/map.js":
 /*!*****************************!*\
   !*** ./resources/js/map.js ***!
@@ -49506,11 +50168,13 @@ function () {
   function Map() {
     _classCallCheck(this, Map);
 
+    this.name = "";
     this.tileset = new Tileset();
     this.layers = [];
     this.width = 1;
     this.height = 1;
     this.walkable = [];
+    this.characters = [];
   }
 
   _createClass(Map, [{
@@ -49527,10 +50191,9 @@ function () {
         for (var j = 0; j < col.length; j++) {
           this.walkable[i].push(1);
         }
-      } //generate walkable map for walkability
+      }
 
-
-      this.layers.forEach(function (layer, index) {
+      this.layers.forEach(function (layer) {
         for (var _i = 0; _i < layer.data.tiles.length; _i++) {
           var _col = layer.data.tiles[_i];
 
@@ -49545,12 +50208,30 @@ function () {
       });
     }
   }, {
+    key: "addCharacter",
+    value: function addCharacter(character) {
+      this.characters.push(character);
+    }
+  }, {
     key: "checkWalkable",
     value: function checkWalkable(x, y) {
       if (x >= this.walkable.length || x < 0) return false;
       if (y >= this.walkable[x].length || y < 0) return false;
       if (this.walkable[x][y] == 0) return false;
-      return true;
+      var result = true;
+      this.characters.forEach(function (character) {
+        if (character.position && character.position.x == x && character.position.y == y) result = false;
+      });
+      return result;
+    }
+  }, {
+    key: "attack",
+    value: function attack(x, y, attacker) {
+      this.characters.forEach(function (character) {
+        if (character.position && character.position.x == x && character.position.y == y) {
+          character.takeDamage(attacker);
+        }
+      });
     }
   }, {
     key: "setDimensions",
@@ -49581,26 +50262,22 @@ function () {
       var selected = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
       var z_index = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
       this.layers.forEach(function (layer, index) {
-        if (layer.data.tiles && (z_index == null || layer.z_index == z_index)) {
-          if (selected != null && index != selected) {
-            ctx.save();
-            ctx.globalAlpha = 0.4;
-          } else if (selected == null || selected == index) {
-            ctx.save();
-            ctx.globalAlpha = 1;
-          }
-
+        if (_this2.shouldDrawLayer(layer, z_index)) {
+          ctx.save();
+          if (selected != null && index != selected) ctx.globalAlpha = 0.4;else ctx.globalAlpha = 1;
           layer.data.tiles.map(function (col, i) {
             col.map(function (tile, j) {
               _this2.tileset.draw(ctx, tile, i * _this2.tileset.tileSize.w, j * _this2.tileset.tileSize.h);
             });
           });
-
-          if (selected != null && layer != selected) {
-            ctx.restore();
-          }
+          ctx.restore();
         }
       });
+    }
+  }, {
+    key: "shouldDrawLayer",
+    value: function shouldDrawLayer(layer, z_index) {
+      return layer.data.tiles && (z_index == null || layer.z_index == z_index);
     }
   }]);
 
@@ -49608,6 +50285,147 @@ function () {
 }();
 
 module.exports = Map;
+
+/***/ }),
+
+/***/ "./resources/js/monster.js":
+/*!*********************************!*\
+  !*** ./resources/js/monster.js ***!
+  \*********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+STATE = __webpack_require__(/*! ./state */ "./resources/js/state.js");
+Character = __webpack_require__(/*! ./character */ "./resources/js/character.js");
+
+var Monster =
+/*#__PURE__*/
+function (_Character) {
+  _inherits(Monster, _Character);
+
+  function Monster() {
+    var _this;
+
+    _classCallCheck(this, Monster);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Monster).call(this));
+    _this.target = null;
+    _this.resting = 0;
+    _this.attackspeed = 30;
+    _this.delay = 0;
+    _this.hp = 5;
+    return _this;
+  }
+
+  _createClass(Monster, [{
+    key: "setState",
+    value: function setState(state) {
+      _get(_getPrototypeOf(Monster.prototype), "setState", this).call(this, state);
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      _get(_getPrototypeOf(Monster.prototype), "update", this).call(this);
+
+      this.roam();
+      if (this.state == STATE.DEAD) return;
+      if (this.state == STATE.IDLE) this.resting++;
+      if (this.state == STATE.IN_COMBAT) this.combat();
+    }
+  }, {
+    key: "combat",
+    value: function combat() {
+      if (this.attackspeed > this.delay) {
+        this.delay++;
+        return;
+      }
+
+      if (this.isNextToPosition(this.target.position.x, this.target.position.y)) {
+        this.delay = 0;
+        this.lookAtDirection(this.target.position.x, this.target.position.y);
+        this.attack();
+      } else {
+        if (this.target.position.x < this.position.x) this.move('W');
+        if (this.target.position.x > this.position.x) this.move('E');
+        if (this.target.position.y < this.position.y) this.move('N');
+        if (this.target.position.y > this.position.y) this.move('S');
+        this.setState(STATE.IN_COMBAT);
+      }
+    }
+  }, {
+    key: "updateStateAfterAnimation",
+    value: function updateStateAfterAnimation() {
+      if (this.state == STATE.ATTACKING || this.state == STATE.IN_COMBAT) this.setState(STATE.IN_COMBAT);else if (this.state == STATE.DYING || this.state == STATE.DEAD) this.setState(STATE.DEAD);else this.setState(STATE.IDLE);
+    }
+  }, {
+    key: "takeDamage",
+    value: function takeDamage(attacker) {
+      _get(_getPrototypeOf(Monster.prototype), "takeDamage", this).call(this, attacker);
+
+      this.target = attacker;
+      this.rest = 0;
+    }
+  }, {
+    key: "roam",
+    value: function roam() {
+      if (this.animating) return;
+
+      if (this.resting >= 100 && this.state == STATE.IDLE) {
+        var dir = Math.floor(Math.random() * 4);
+        if (dir == 0) this.move('N');
+        if (dir == 1) this.move('S');
+        if (dir == 2) this.move('E');
+        if (dir == 3) this.move('W');
+        this.resting = 0;
+      }
+    }
+  }]);
+
+  return Monster;
+}(Character);
+
+module.exports = Monster;
+
+/***/ }),
+
+/***/ "./resources/js/state.js":
+/*!*******************************!*\
+  !*** ./resources/js/state.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var STATE = {
+  IDLE: "idle",
+  MOVING: "moving",
+  ATTACKING: "attacking",
+  IN_COMBAT: "in_combat",
+  DYING: "dying",
+  DEAD: "dead"
+};
+module.exports = STATE;
 
 /***/ }),
 

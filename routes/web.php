@@ -12,7 +12,10 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    if(auth()->guest())
+        return view('welcome');
+    
+    return redirect()->route('home');
 });
 
 

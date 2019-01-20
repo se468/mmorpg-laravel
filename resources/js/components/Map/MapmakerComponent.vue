@@ -2,7 +2,10 @@
     <div class="row">
         <div class="col-md-9">
             <div class="mb-4">
+                <button class="btn btn-sm btn-secondary">Events</button>
+
                 <div class="btn-group btn-group-sm" role="group">
+                    
                     <template v-for="(layer, ind) in this.gameObjects.map.layers">
                         <button type="button" class="btn btn-sm btn-secondary" 
                             @click="selectLayer(ind)"
@@ -13,9 +16,10 @@
                 
                     <button type="button" class="btn btn-sm btn-secondary" @click="createLayer()">+</button>
                 </div>
-
-                <button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#layer-settings">Layer Settings</button>
-                <button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#map-settings">Map Settings</button>
+                <div class="float-right">
+                    <button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#layer-settings">Layer Settings</button>
+                    <button class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#map-settings">Map Settings</button>
+                </div>
             </div>
             
             <div class="w-100" style="overflow: auto; height: 500px;">
@@ -137,7 +141,9 @@
                 numLayers: 1,
                 selectedLayer: 0,
 
-                selectedTool: TOOLS.PENCIL
+                selectedTool: TOOLS.PENCIL,
+
+                display: null
             }
         },
 
@@ -152,6 +158,7 @@
         methods: {
             prepareComponent() {
                 this.canvas = document.getElementById('mapmaker-map');
+                this.display = new Display(this.canvas)
                 
                 this.gameObjects.map.tileset.image.onload = ()=>{
                     this.drawTiles();
@@ -178,13 +185,17 @@
                     let x = e.clientX - e.target.getBoundingClientRect().x;
                     let y = e.clientY - e.target.getBoundingClientRect().y;
                     let grid = this.getGrid(x, y);
+                    let selectedLayer = this.gameObjects.map.layers[this.selectedLayer]
                     this.mousedown = true;
 
                     if(this.selectedTool == TOOLS.PENCIL) {
-                        this.gameObjects.map.layers[this.selectedLayer].data.tiles[grid.x][grid.y] = JSON.parse(JSON.stringify(this.selectedTile));
+                        selectedLayer.data.tiles[grid.x][grid.y] = JSON.parse(JSON.stringify(this.selectedTile));
                     }
                     else if (this.selectedTool == TOOLS.ERASER) {
-                        this.gameObjects.map.layers[this.selectedLayer].data.tiles[grid.x][grid.y] = {};
+                        selectedLayer.data.tiles[grid.x][grid.y] = {};
+                    }
+                    else if (this.selectedTool = TOOLS.FILL) {
+                        this.floodfill(grid.x, grid.y, selectedLayer.data.tiles[grid.x][grid.y], this.selectedTile)
                     }
 
                     this.drawMap();
@@ -198,6 +209,26 @@
                     this.mousedown = false;
                 }, false);
             },
+
+            floodfill(x,y, targetTile, replacementTile) {
+                
+                if(targetTile == replacementTile || targetTile.id == replacementTile.id) return //already same
+                
+
+                let selectedLayer = this.gameObjects.map.layers[this.selectedLayer]
+                if(x < 0 || x > selectedLayer.data.tiles.length - 1) return //size don't make sense
+                if(y < 0 || y > selectedLayer.data.tiles[0].length - 1) return  //size don't make sense
+                
+                if(selectedLayer.data.tiles[x][y].x != targetTile.x || selectedLayer.data.tiles[x][y].y != targetTile.y) return //this is not the target tile to replace
+                selectedLayer.data.tiles[x][y] =  JSON.parse(JSON.stringify(replacementTile))//set the color of the node to replace color
+                this.floodfill(x, y + 1, targetTile, replacementTile) //south
+                this.floodfill(x, y - 1, targetTile, replacementTile) //north
+                this.floodfill(x - 1, y, targetTile, replacementTile) //west
+                this.floodfill(x + 1, y, targetTile, replacementTile) //east
+
+                return
+            },
+
             getGrid(x, y) {
                 let gridX = (x) / this.gameObjects.map.tileset.tileSize.w;
                 let gridY = (y) / this.gameObjects.map.tileset.tileSize.h;
@@ -210,7 +241,7 @@
 
             drawMap () {
                 this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.gameObjects.map.draw(this.canvas.getContext('2d'),this.selectedLayer);
+                this.display.drawMap(this.selectedLayer)
             },
 
             drawTiles() {
@@ -226,7 +257,7 @@
 
             createLayer () {
                 this.gameObjects.map.addBlankLayer()
-
+                this.selectedLayer = this.gameObjects.map.layers.length - 1
                 this.drawMap()
             },
 

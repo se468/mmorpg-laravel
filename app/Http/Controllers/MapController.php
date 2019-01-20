@@ -6,6 +6,7 @@ use App\Map;
 use App\Tileset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MapController extends Controller
 {
@@ -97,6 +98,10 @@ class MapController extends Controller
                 'data' => $layerData['data'],
                 'z_index' => $layerData['z_index']
             ]);
+            $url = "maplayers/layer_$layer->id.json";
+            Storage::put($url, $layerData['data']);
+            $layer->url = $url;
+            $layer->save();
         }
 
         return response()->json([
